@@ -28,7 +28,7 @@ class FinalState(Exception):
 
     def __init__(self, token_name: str, retract_pointer: bool):
         self.token_name = token_name
-        self.retract = retract_pointer
+        self.retract_pointer = retract_pointer
 
 
 class CannotMove(Exception):
