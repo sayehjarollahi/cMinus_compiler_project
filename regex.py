@@ -8,6 +8,7 @@ class FinalStates(enum.Enum):
 
 class Regex(enum.Enum):
     ID_KEYWORD_OTHER = r'[^A-Za-z0-9]'
+    letter = r''
 
 
 transitions = list()
