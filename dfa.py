@@ -1,6 +1,6 @@
 from typing import Dict, Tuple, List, Union
 import re
-from regex import Regex
+from statics import Regex
 
 
 class DFA:

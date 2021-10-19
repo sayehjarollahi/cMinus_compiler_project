@@ -1,5 +1,5 @@
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from pathlib import Path
 from dfa import DFA, FinalState, InvalidInput, InvalidNumber, UnmatchedComment
 
@@ -21,7 +21,7 @@ class Scanner:
         self.error_messages = []
         self.symbol_table = []
 
-    def get_next_token(self) -> Tuple[str, str]:
+    def get_next_token(self) -> Optional[Tuple[str, str]]:
         '''abcd=h
         self.current_character = read_char
         self.token = self.token + self.current_character
@@ -34,17 +34,17 @@ class Scanner:
                 if not final_state.retract_pointer:
                     self.move_pointer()
                 if final_state.token_name == 'NUM' or final_state.token_name == 'SYMBOL':
-                    return tuple(final_state.token_name, self.current_lexeme)
+                    return final_state.token_name, self.current_lexeme
                 if final_state.token_name == 'ID_KEYWORD':
                     if self.current_lexeme in self.keywords:
-                        return tuple('KEYWORD', self.current_lexeme)
+                        return 'KEYWORD', self.current_lexeme
                     else:
-                        return tuple('ID', self.current_lexeme)
+                        return 'ID', self.current_lexeme
                 return
             except (InvalidInput, InvalidNumber, UnmatchedComment) as error_message:
                 self.move_pointer()
                 self.error_messages.append(
-                    tuple(self.current_lexeme, str(error_message)))
+                    (self.current_lexeme, str(error_message)))
                 return
             else:
                 self.move_pointer()
