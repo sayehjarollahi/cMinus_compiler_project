@@ -22,7 +22,6 @@ class DFA:
                 self.handle_final_state()
                 break
             else:
-
                 if self.current_state == 1:
                     self.current_state = 0
                     raise InvalidNumber('Invalid number')

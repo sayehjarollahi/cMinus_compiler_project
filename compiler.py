@@ -15,7 +15,7 @@ def get_all_tokens():
     while True:
         try:
             token_name, token_lexeme = scanner.get_next_token()
-            print(str(scanner.line_number)+' '+token_name+'{' +token_lexeme+'}')
+           # print(str(scanner.line_number)+' '+token_name+'{' +token_lexeme+'}')
         except ReachedEOF:
             break
 
