@@ -36,11 +36,13 @@ class Scanner:
                 if self.multi_line_comment_opened:
                     self.multi_line_comment_opened = False
                 return self.get_final_token(final_state)
-            except (InvalidInput, InvalidNumber, UnmatchedComment) as error_message:
+            except (InvalidNumber, UnmatchedComment) as error_message:
                 self.move_pointer()
-                self.error_messages.append(
-                    (self.current_lexeme, str(error_message)))
-                self.reset_lexem()
+                self.add_error_message(error_message)
+            except InvalidInput as error_message:
+                if not error_message.does_retract_pointer:
+                    self.move_pointer()
+                self.add_error_message(error_message)
             except UnclosedComment:
                 self.append_unclosed_comment_lexeme()
                 self.reset_lexem()
@@ -62,6 +64,10 @@ class Scanner:
             return TokenNames.KEYWORD.name, self.current_lexeme
         else:
             return TokenNames.ID.name, self.current_lexeme
+
+    def add_error_message(self,error_message):
+        self.error_messages.append((self.current_lexeme, str(error_message)))
+        self.reset_lexem()
 
     def get_final_token(self, final_state: FinalState) -> Tuple[str, str]:
         token = final_state.token_name, self.current_lexeme
