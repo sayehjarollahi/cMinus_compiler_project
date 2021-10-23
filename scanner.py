@@ -1,7 +1,8 @@
 from typing import List, Tuple, Optional
 from pathlib import Path
 from dfa import DFA, FinalState, InvalidInput, InvalidNumber, UnmatchedComment, UnclosedComment
-from statics import TokenNames, KEYWORDS,ERROR_FILE_PATH
+from statics import TokenNames, KEYWORDS, ERROR_FILE_PATH
+
 
 class Scanner:
 
@@ -18,7 +19,7 @@ class Scanner:
         self.dfa = DFA()
         self.tokens = []
         self.error_messages = []
-        self.symbol_table = []
+        self.symbol_table = set(self.keywords)
         self.line_number = 1
 
     def get_next_token(self) -> Optional[Tuple[str, str]]:
@@ -40,6 +41,7 @@ class Scanner:
                 self.append_unclosed_comment_lexeme()
                 self.reset_lexem()
                 self.write_line_in_files()
+                self.write_symbol_table_in_file()
                 raise ReachedEOF()
             else:
                 self.move_pointer()
@@ -54,9 +56,11 @@ class Scanner:
         token = final_state.token_name, self.current_lexeme
         if final_state.token_name == TokenNames.EOF.name:
             self.write_line_in_files()
+            self.write_symbol_table_in_file()
             raise ReachedEOF()
         if final_state.token_name == TokenNames.ID_KEYWORD.name:
             token = self.get_id_keyword_token()
+            self.symbol_table.add(token[1])
         elif final_state.token_name == TokenNames.WHITESPACE.name:
             if self.current_lexeme == '\n':
                 self.write_line_in_files()
@@ -88,6 +92,12 @@ class Scanner:
                     self.line_number, self.error_messages))
             self.error_messages = []
 
+    def write_symbol_table_in_file(self):
+        result = ''
+        for index, token_name in enumerate(self.symbol_table):
+            result += f'{index+1}.\t{token_name}\n'
+        self.symbol_table_file_path.write_text(result)
+
     def add_token(self, token_name, token_lexeme):
         self.reset_lexem()
         if token_name is not TokenNames.WHITESPACE.name and token_name is not TokenNames.COMMENT.name:
@@ -108,6 +118,6 @@ def get_formatted_string(line_number: int, strings_list: List[str]) -> str:
 class ReachedEOF(Exception):
 
     def __init__(self):
-        with open(ERROR_FILE_PATH,'w+' ) as error_file:
+        with open(ERROR_FILE_PATH, 'w+') as error_file:
             if error_file.read(1) == '':
                 error_file.write('There is no lexical error.')

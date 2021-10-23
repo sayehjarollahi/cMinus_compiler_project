@@ -2,8 +2,10 @@
 from scanner import Scanner, ReachedEOF
 from statics import ERROR_FILE_PATH, SYMBOL_TABLE_FILE_PATH, TOKENS_FILE_PATH, INPUT_FILE_PATH
 
+
 def get_all_tokens():
-    scanner = Scanner(errors_file_path=ERROR_FILE_PATH, tokens_file_path=TOKENS_FILE_PATH, input_file_path=INPUT_FILE_PATH, symbol_table_file_path=SYMBOL_TABLE_FILE_PATH)
+    scanner = Scanner(errors_file_path=ERROR_FILE_PATH, tokens_file_path=TOKENS_FILE_PATH,
+                      input_file_path=INPUT_FILE_PATH, symbol_table_file_path=SYMBOL_TABLE_FILE_PATH)
     while True:
         try:
             token_name, token_lexeme = scanner.get_next_token()
