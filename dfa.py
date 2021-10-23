@@ -15,6 +15,7 @@ class DFA:
 
     def move(self, current_char: str):
         if not re.match(Regex.ALL_ALLOWED.value, current_char):
+            self.current_state = 0
             raise InvalidInput('Invalid input')
         for next_state, regex in self.transitions_dict.get(self.current_state, []):
             if re.match(regex, current_char):
