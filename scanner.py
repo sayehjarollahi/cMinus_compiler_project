@@ -1,8 +1,7 @@
 from typing import List, Tuple, Optional
 from pathlib import Path
 from dfa import DFA, FinalState, InvalidInput, InvalidNumber, UnmatchedComment, UnclosedComment
-from statics import TokenNames, KEYWORDS
-
+from statics import TokenNames, KEYWORDS,ERROR_FILE_PATH
 
 class Scanner:
 
@@ -68,7 +67,7 @@ class Scanner:
     def append_unclosed_comment_lexeme(self):
         lexeme = self.current_lexeme
         if len(self.current_lexeme) > 7:
-            lexeme = self.current_lexeme[0:6]
+            lexeme = self.current_lexeme[0:7]
             lexeme += '...'
         self.error_messages.append((lexeme, 'Unclosed comment'))
 
@@ -91,7 +90,7 @@ class Scanner:
 
     def add_token(self, token_name, token_lexeme):
         self.reset_lexem()
-        if token_name is not TokenNames.WHITESPACE.name:
+        if token_name is not TokenNames.WHITESPACE.name and token_name is not TokenNames.COMMENT.name:
             self.tokens.append((token_name, token_lexeme))
 
     def reset_lexem(self):
@@ -104,8 +103,11 @@ def get_formatted_string(line_number: int, strings_list: List[str]) -> str:
         result = result + '(' + item[0] + ', ' + item[1] + ') '
     result += '\n'
     return result
-    # return f'{line_number}.\t' + ('{} ' * len(strings_list).format(*strings_list)) + '\n'
 
 
 class ReachedEOF(Exception):
-    pass
+
+    def __init__(self):
+        with open(ERROR_FILE_PATH,'w+' ) as error_file:
+            if error_file.read(1) == '':
+                error_file.write('There is no lexical error.')

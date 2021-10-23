@@ -1,4 +1,10 @@
 import enum
+from pathlib import Path
+
+ERROR_FILE_PATH = Path('./lexical_errors.txt')
+TOKENS_FILE_PATH = Path('./tokens.txt')
+SYMBOL_TABLE_FILE_PATH = Path('./symbol_table.txt')
+INPUT_FILE_PATH = Path('./input.txt')
 
 
 class Regex(enum.Enum):

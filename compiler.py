@@ -1,14 +1,6 @@
-import re
-from pathlib import Path
 
 from scanner import Scanner, ReachedEOF
-from statics import Regex
-
-ERROR_FILE_PATH = Path('./lexical_errors.txt')
-TOKENS_FILE_PATH = Path('./tokens.txt')
-SYMBOL_TABLE_FILE_PATH = Path('./symbol_table.txt')
-INPUT_FILE_PATH = Path('./input.txt')
-
+from statics import ERROR_FILE_PATH, SYMBOL_TABLE_FILE_PATH, TOKENS_FILE_PATH, INPUT_FILE_PATH
 
 def get_all_tokens():
     scanner = Scanner(errors_file_path=ERROR_FILE_PATH, tokens_file_path=TOKENS_FILE_PATH, input_file_path=INPUT_FILE_PATH, symbol_table_file_path=SYMBOL_TABLE_FILE_PATH)
@@ -24,6 +16,7 @@ open(ERROR_FILE_PATH, 'w')
 open(TOKENS_FILE_PATH, 'w')
 open(SYMBOL_TABLE_FILE_PATH, 'w')
 get_all_tokens()
+
 
 # file = open(INPUT_FILE_PATH,'r')
 # line=0
