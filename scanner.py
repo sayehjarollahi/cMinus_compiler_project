@@ -118,6 +118,6 @@ def get_formatted_string(line_number: int, strings_list: List[str]) -> str:
 class ReachedEOF(Exception):
 
     def __init__(self):
-        with open(ERROR_FILE_PATH, 'w+') as error_file:
+        with open(ERROR_FILE_PATH, 'r+') as error_file:
             if error_file.read(1) == '':
                 error_file.write('There is no lexical error.')
