@@ -2,7 +2,7 @@ import re
 from typing import List, Tuple, Optional
 from pathlib import Path
 from dfa import DFA, FinalState, InvalidInput, InvalidNumber, UnmatchedComment
-
+from statics import TokenNames
 
 class Scanner:
 
@@ -33,13 +33,13 @@ class Scanner:
             except FinalState as final_state:
                 if not final_state.retract_pointer:
                     self.move_pointer()
-                if final_state.token_name == 'NUM' or final_state.token_name == 'SYMBOL':
+                if final_state.token_name == TokenNames.NUM.name or final_state.token_name == TokenNames.SYMBOL.name:
                     return final_state.token_name, self.current_lexeme
-                if final_state.token_name == 'ID_KEYWORD':
+                if final_state.token_name == TokenNames.ID_KEYWORD.name:
                     if self.current_lexeme in self.keywords:
-                        return 'KEYWORD', self.current_lexeme
+                        return TokenNames.KEYWORD.name, self.current_lexeme
                     else:
-                        return 'ID', self.current_lexeme
+                        return TokenNames.ID.name, self.current_lexeme
                 return
             except (InvalidInput, InvalidNumber, UnmatchedComment) as error_message:
                 self.move_pointer()
