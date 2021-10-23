@@ -14,7 +14,7 @@ class DFA:
         self.current_state = 0
 
     def move(self, current_char: str):
-        if not re.match(Regex.ALL_ALLOWED.value, current_char):
+        if not re.match(Regex.ALL_ALLOWED.value, current_char) and self.current_state not in (6, 8, 9):
             self.current_state = 0
             raise InvalidInput('Invalid input')
         for next_state, regex in self.transitions_dict.get(self.current_state, []):

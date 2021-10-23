@@ -21,6 +21,8 @@ class Scanner:
         self.error_messages = []
         self.symbol_table = set(self.keywords)
         self.line_number = 1
+        self.multi_line_comment_opened = False
+        self.multi_line_comment_line_number = 0
 
     def get_next_token(self) -> Optional[Tuple[str, str]]:
         while True:
@@ -31,6 +33,8 @@ class Scanner:
             except FinalState as final_state:
                 if not final_state.retract_pointer:
                     self.move_pointer()
+                if self.multi_line_comment_opened:
+                    self.multi_line_comment_opened = False
                 return self.get_final_token(final_state)
             except (InvalidInput, InvalidNumber, UnmatchedComment) as error_message:
                 self.move_pointer()
@@ -40,10 +44,17 @@ class Scanner:
             except UnclosedComment:
                 self.append_unclosed_comment_lexeme()
                 self.reset_lexem()
+                self.line_number = self.multi_line_comment_line_number
                 self.write_line_in_files()
                 self.write_symbol_table_in_file()
                 raise ReachedEOF()
             else:
+                if self.current_character == '\n':
+                    if not self.multi_line_comment_opened:
+                        self.multi_line_comment_opened = True
+                        self.multi_line_comment_line_number = self.line_number
+                    self.write_line_in_files()
+                    self.line_number += 1
                 self.move_pointer()
 
     def get_id_keyword_token(self):
