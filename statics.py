@@ -7,12 +7,13 @@ class Regex(enum.Enum):
     SYMBOL = r'[;:,\[\]\(\){}\+\-\*=<]'
     WHITESPACE = r'[\x20\x0a\x0d\x09\x0b\x0c ]'
     EOF = r'\x05'
-    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + '|' + WHITESPACE + '|' + EOF + '|' + '/'
+    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + \
+        '|' + WHITESPACE + '|' + EOF + '|' + '/'
     NUM_OTHER = SYMBOL + '|' + WHITESPACE + '|' + EOF
     LETTER_OR_DIGIT = DIGIT + '|' + LETTER
     ID_KEYWORD_OTHER = NUM_OTHER
     SLASH = r'/'
-    NOT_BACKSLASH = r'[^\\]'
+    NOT_SLASH = r'[^/]'
     BACKSLASH = r'\\'
     INSIDE_ONE_LINE_COMMENT = r'[^\x0a\x05]'
     END_ONE_LINE_COMMENT = r'[\x0a\x05]'
@@ -82,7 +83,7 @@ STATE12_TRANSITIONS = [
     (14, Regex.EQUAL.value)
 ]
 STATE16_TRANSITIONS = [
-    (17, Regex.NOT_BACKSLASH.value),
+    (17, Regex.NOT_SLASH.value),
 ]
 TRANSITIONS = {
     0: STATE0_TRANSITIONS,
