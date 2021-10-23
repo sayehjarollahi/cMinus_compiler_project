@@ -21,19 +21,19 @@ class DFA:
                 self.current_state = next_state
                 self.handle_final_state()
                 break
-            else:
-                if self.current_state == 1:
-                    self.current_state = 0
-                    raise InvalidNumber('Invalid number')
-                elif self.current_state == 16:
-                    self.current_state = 0
-                    raise UnmatchedComment('Unmatched comment')
-                elif self.current_state == 8 or self.current_state == 9:
-                    self.current_state = 0
-                    raise UnclosedComment()
-                elif self.current_state == 5:
-                    self.current_state = 0
-                    raise InvalidInput('Invalid input')
+        else:
+            if self.current_state == 1:
+                self.current_state = 0
+                raise InvalidNumber('Invalid number')
+            elif self.current_state == 16:
+                self.current_state = 0
+                raise UnmatchedComment('Unmatched comment')
+            elif self.current_state == 8 or self.current_state == 9:
+                self.current_state = 0
+                raise UnclosedComment()
+            elif self.current_state == 5:
+                self.current_state = 0
+                raise InvalidInput('Invalid input')
 
     def handle_final_state(self):
         if self.current_state in self.final_states:

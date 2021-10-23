@@ -31,9 +31,9 @@ class Scanner:
             except FinalState as final_state:
                 return self.get_final_token(final_state)
             except (InvalidInput, InvalidNumber, UnmatchedComment) as error_message:
+                self.move_pointer()
                 self.error_messages.append((self.current_lexeme, str(error_message)))
                 self.reset_lexem()
-                self.move_pointer()
             except UnclosedComment:
                 self.append_unclosed_comment_lexeme()
                 self.reset_lexem()
