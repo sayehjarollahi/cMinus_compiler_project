@@ -7,8 +7,8 @@ class Regex(enum.Enum):
     SYMBOL = r'[;:,\[\]\(\){}\+\-\*=<]'
     WHITESPACE = r'[\x20\x0a\x0d\x09\x0b\x0c ]'
     EOF = r'\x05'
-    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + '|' + '|' + WHITESPACE + '|' + EOF + '/'
-    NUM_OTHER = SYMBOL + '|' + '|' + WHITESPACE + '|' + EOF
+    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + '|' + WHITESPACE + '|' + EOF + '/'
+    NUM_OTHER = SYMBOL + '|' + WHITESPACE + '|' + EOF
     LETTER_OR_DIGIT = DIGIT + '|' + LETTER
     ID_KEYWORD_OTHER = NUM_OTHER
     SLASH = r'/'

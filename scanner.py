@@ -59,6 +59,7 @@ class Scanner:
             token = self.get_id_keyword_token()
         elif final_state.token_name == TokenNames.WHITESPACE.name:
             if self.current_lexeme == '\n':
+                self.write_line_in_files()
                 self.line_number += 1
         self.add_token(token[0], token[1])
         return token
@@ -81,13 +82,14 @@ class Scanner:
                 token_file.write(get_formatted_string(self.line_number, self.tokens))
             self.tokens = []
         if self.error_messages:
-            with self.tokens_file_path.open('a') as error_file:
+            with self.errors_file_path.open('a') as error_file:
                 error_file.write(get_formatted_string(self.line_number, self.error_messages))
             self.error_messages = []
 
     def add_token(self, token_name, token_lexeme):
         self.reset_lexem()
-        self.tokens.append((token_name, token_lexeme))
+        if token_name is not TokenNames.WHITESPACE.name:
+            self.tokens.append((token_name, token_lexeme))
 
     def reset_lexem(self):
         self.current_lexeme = ''
