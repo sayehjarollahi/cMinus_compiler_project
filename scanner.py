@@ -29,23 +29,7 @@ class Scanner:
             try:
                 self.dfa.move(self.current_character)
             except FinalState as final_state:
-                if not final_state.retract_pointer:
-                    self.move_pointer()
-                if final_state.token_name == TokenNames.EOF.name:
-                    self.write_line_in_files()
-                    raise ReachedEOF()
-                if final_state.token_name == TokenNames.ID_KEYWORD.name:
-                    token = self.get_id_keyword_token()
-                    self.add_token(token[0], token[1])
-                    self.reset_lexem()
-                    return token
-                elif final_state.token_name == TokenNames.WHITESPACE.name:
-                    if self.current_lexeme == '\n':
-                        self.line_number += 1
-                token = final_state.token_name, self.current_lexeme
-                self.reset_lexem()
-                self.add_token(token[0], token[1])
-                return token
+                return self.get_final_token(final_state)
             except (InvalidInput, InvalidNumber, UnmatchedComment) as error_message:
                 self.error_messages.append((self.current_lexeme, str(error_message)))
                 self.reset_lexem()
@@ -63,6 +47,21 @@ class Scanner:
             return TokenNames.KEYWORD.name, self.current_lexeme
         else:
             return TokenNames.ID.name, self.current_lexeme
+
+    def get_final_token(self, final_state: FinalState) -> Tuple[str, str]:
+        token = final_state.token_name, self.current_lexeme
+        if not final_state.retract_pointer:
+            self.move_pointer()
+        if final_state.token_name == TokenNames.EOF.name:
+            self.write_line_in_files()
+            raise ReachedEOF()
+        if final_state.token_name == TokenNames.ID_KEYWORD.name:
+            token = self.get_id_keyword_token()
+        elif final_state.token_name == TokenNames.WHITESPACE.name:
+            if self.current_lexeme == '\n':
+                self.line_number += 1
+        self.add_token(token[0], token[1])
+        return token
 
     def append_unclosed_comment_lexeme(self):
         lexeme = self.current_lexeme
@@ -87,6 +86,7 @@ class Scanner:
             self.error_messages = []
 
     def add_token(self, token_name, token_lexeme):
+        self.reset_lexem()
         self.tokens.append((token_name, token_lexeme))
 
     def reset_lexem(self):
@@ -94,12 +94,12 @@ class Scanner:
 
 
 def get_formatted_string(line_number: int, strings_list: List[str]) -> str:
-    result = str(line_number)+'.\t'
+    result = str(line_number) + '.\t'
     for item in strings_list:
-        result = result + '('+ item[0] + ', '+item[1]+') '
+        result = result + '(' + item[0] + ', ' + item[1] + ') '
     result += '\n'
     return result
-    #return f'{line_number}.\t' + ('{} ' * len(strings_list).format(*strings_list)) + '\n'
+    # return f'{line_number}.\t' + ('{} ' * len(strings_list).format(*strings_list)) + '\n'
 
 
 class ReachedEOF(Exception):
