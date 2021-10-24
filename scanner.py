@@ -6,12 +6,10 @@ from statics import TokenNames, KEYWORDS, ERROR_FILE_PATH
 
 class Scanner:
 
-    def __init__(self, input_file_path: Path, tokens_file_path: Path, errors_file_path: Path,
-                 symbol_table_file_path: Path):
+    def __init__(self, input_file_path: Path, tokens_file_path: Path, errors_file_path: Path):
         self.input_file = open(input_file_path, 'r')
         self.tokens_file_path = tokens_file_path
         self.errors_file_path = errors_file_path
-        self.symbol_table_file_path = symbol_table_file_path
         self.keywords = KEYWORDS
         self.previous_character = ''
         self.current_character = self.input_file.read(1)
@@ -19,7 +17,6 @@ class Scanner:
         self.dfa = DFA()
         self.tokens = []
         self.error_messages = []
-        self.symbol_table = set(self.keywords)
         self.line_number = 1
         self.multi_line_comment_opened = False
         self.multi_line_comment_line_number = 0
@@ -33,8 +30,6 @@ class Scanner:
             except FinalState as final_state:
                 if not final_state.retract_pointer:
                     self.move_pointer()
-                if self.multi_line_comment_opened:
-                    self.multi_line_comment_opened = False
                 return self.get_final_token(final_state)
             except (InvalidNumber, UnmatchedComment) as error_message:
                 self.move_pointer()
@@ -48,7 +43,6 @@ class Scanner:
                 self.reset_lexem()
                 self.line_number = self.multi_line_comment_line_number
                 self.write_line_in_files()
-                self.write_symbol_table_in_file()
                 raise ReachedEOF()
             else:
                 if self.current_character == '\n':
@@ -65,7 +59,7 @@ class Scanner:
         else:
             return TokenNames.ID.name, self.current_lexeme
 
-    def add_error_message(self,error_message):
+    def add_error_message(self, error_message):
         self.error_messages.append((self.current_lexeme, str(error_message)))
         self.reset_lexem()
 
@@ -73,17 +67,23 @@ class Scanner:
         token = final_state.token_name, self.current_lexeme
         if final_state.token_name == TokenNames.EOF.name:
             self.write_line_in_files()
-            self.write_symbol_table_in_file()
             raise ReachedEOF()
         if final_state.token_name == TokenNames.ID_KEYWORD.name:
             token = self.get_id_keyword_token()
-            self.symbol_table.add(token[1])
         elif final_state.token_name == TokenNames.WHITESPACE.name:
             if self.current_lexeme == '\n':
                 self.write_line_in_files()
                 self.line_number += 1
-        self.add_token(token[0], token[1])
+        elif final_state.token_name == TokenNames.COMMENT.name:
+            if self.multi_line_comment_opened:
+                self.multi_line_comment_opened = False
+        self.add_token(*token)
         return token
+
+    def add_token(self, token_name, token_lexeme):
+        self.reset_lexem()
+        if token_name is not TokenNames.WHITESPACE.name and token_name is not TokenNames.COMMENT.name:
+            self.tokens.append((token_name, token_lexeme))
 
     def append_unclosed_comment_lexeme(self):
         lexeme = self.current_lexeme
@@ -109,31 +109,19 @@ class Scanner:
                     self.line_number, self.error_messages))
             self.error_messages = []
 
-    def write_symbol_table_in_file(self):
-        result = ''
-        for index, token_name in enumerate(self.symbol_table):
-            result += f'{index+1}.\t{token_name}\n'
-        self.symbol_table_file_path.write_text(result)
-
-    def add_token(self, token_name, token_lexeme):
-        self.reset_lexem()
-        if token_name is not TokenNames.WHITESPACE.name and token_name is not TokenNames.COMMENT.name:
-            self.tokens.append((token_name, token_lexeme))
-
     def reset_lexem(self):
         self.current_lexeme = ''
 
 
-def get_formatted_string(line_number: int, strings_list: List[str]) -> str:
-    result = str(line_number) + '.\t'
+def get_formatted_string(line_number: int, strings_list: List[Tuple[str, str]]) -> str:
+    result = f'{line_number}.\t'
     for item in strings_list:
-        result = result + '(' + item[0] + ', ' + item[1] + ') '
+        result = result + '({}, {}) '.format(*item)
     result += '\n'
     return result
 
 
 class ReachedEOF(Exception):
-
     def __init__(self):
         with open(ERROR_FILE_PATH, 'r+') as error_file:
             if error_file.read(1) == '':
