@@ -8,30 +8,30 @@ INPUT_FILE_PATH = Path('./input.txt')
 
 
 class Regex(enum.Enum):
-    SLASH = r'/'
-    DIGIT = r'\d'
-    LETTER = r'[A-Za-z]'
-    SYMBOL = r'[;:,\[\]\(\){}\+\-\*=<]'
-    WHITESPACE = r'[\x20\x0a\x0d\x09\x0b\x0c ]'
-    EOF = r'\x05'
-    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + \
-        '|' + WHITESPACE + '|' + EOF + '|' + '/'
-    NUM_OTHER = SYMBOL + '|' + WHITESPACE + '|' + EOF + '|' + SLASH
-    LETTER_OR_DIGIT = DIGIT + '|' + LETTER
+    SLASH = {'/'}
+    DIGIT = set('0123456789')
+    LETTER = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    SYMBOL = set(';:,[](){}+-*=<')
+    WHITESPACE = {chr(32), chr(10), chr(13), chr(9), chr(11), chr(12)}
+    EOF = {chr(5)}
+    ALL_ALLOWED = DIGIT | LETTER | SYMBOL | WHITESPACE | EOF | SLASH
+    NUM_OTHER = SYMBOL | WHITESPACE | EOF | SLASH
+    LETTER_OR_DIGIT = DIGIT | LETTER
     ID_KEYWORD_OTHER = NUM_OTHER
-    NOT_SLASH = r'[^/]'
-    BACKSLASH = r'\\'
-    INSIDE_ONE_LINE_COMMENT = r'[^\x0a\x05]'
-    END_ONE_LINE_COMMENT = r'[\x0a\x05]'
-    STAR = r'\*'
-    NOT_STAR_EOF = r'[^\*\x05]'
-    NOT_SLASH_STAR_EOF = r'[^/\*\x05]'
-    EQUAL = r'='
-    SYMBOL_NOT_EQUAL = r'[;:,\[\]\(\){}\+\-\*<]'
-    SYMBOL_OTHER = DIGIT + '|' + LETTER + '|' + SYMBOL_NOT_EQUAL + \
-        '|' + WHITESPACE + '|' + SLASH + '|' + EOF
-    SYMBOL_NOT_STAR = r'[;:,\[\]\(\){}\+\-=<]'
-    END_LINE = r'\x0a'
+    NOT_SLASH = ALL_ALLOWED - SLASH
+    BACKSLASH = {'\\'}
+    INSIDE_ONE_LINE_COMMENT = set(
+        '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\r') | {chr(11)} | {chr(12)} | DIGIT | LETTER
+    END_ONE_LINE_COMMENT = {chr(10), chr(5)}
+    STAR = {'*'}
+    NOT_STAR_EOF = set(
+        '!"#$%&\'()+,-./:;<=>?@[\\]^_`{|}~ \t\n\r') | {chr(11)} | {chr(12)} | DIGIT | LETTER
+    NOT_SLASH_STAR_EOF = NOT_STAR_EOF - SLASH
+    EQUAL = {'='}
+    SYMBOL_NOT_EQUAL = SYMBOL - EQUAL
+    SYMBOL_OTHER = DIGIT | LETTER | SYMBOL_NOT_EQUAL | WHITESPACE | SLASH | EOF
+    SYMBOL_NOT_STAR = SYMBOL - STAR
+    END_LINE = {chr(10)}
 
 
 class TokenNames(enum.Enum):

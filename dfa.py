@@ -1,4 +1,3 @@
-import re
 from statics import Regex, TRANSITIONS, FINAL_STATES
 
 
@@ -15,13 +14,13 @@ class DFA:
         self.new_line_counter = 0
 
     def move(self, current_char: str):
-        if not re.match(Regex.ALL_ALLOWED.value, current_char) and self.current_state not in (1, 6, 8, 9):
+        if not match(Regex.ALL_ALLOWED.value, current_char) and self.current_state not in (1, 6, 8, 9):
             self.current_state = 0
             raise InvalidInput(False)
         for next_state, regex in self.transitions_dict.get(self.current_state, []):
-            if re.match(regex, current_char):
+            if match(regex, current_char):
                 self.current_state = next_state
-                if re.match(Regex.END_LINE.value, current_char) and self.current_state in (8, 11):
+                if match(Regex.END_LINE.value, current_char) and self.current_state in (8, 11):
                     self.new_line_counter += 1
                 self.handle_final_state()
                 break
@@ -48,6 +47,10 @@ class DFA:
             self.new_line_counter = 0
             raise FinalState(
                 *self.final_states[final_state_number], new_line_counter)
+
+
+def match(character_set: set[str], character: str) -> bool:
+    return character in character_set
 
 
 class FinalState(Exception):
