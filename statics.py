@@ -30,6 +30,7 @@ class Regex(enum.Enum):
     SYMBOL_NOT_EQUAL = r'[;:,\[\]\(\){}\+\-\*<]'
     SYMBOL_OTHER = DIGIT + '|' + LETTER + '|' + SYMBOL_NOT_EQUAL + '|' + WHITESPACE
     SYMBOL_NOT_STAR = r'[;:,\[\]\(\){}\+\-=<]'
+    END_LINE = r'\x0a'
 
 
 class TokenNames(enum.Enum):

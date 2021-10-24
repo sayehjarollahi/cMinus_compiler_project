@@ -18,8 +18,6 @@ class Scanner:
         self.tokens = []
         self.error_messages = []
         self.line_number = 1
-        self.multi_line_comment_opened = False
-        self.multi_line_comment_line_number = 0
 
     def get_next_token(self) -> Optional[Tuple[str, str]]:
         while True:
@@ -41,16 +39,9 @@ class Scanner:
             except UnclosedComment:
                 self.append_unclosed_comment_lexeme()
                 self.reset_lexem()
-                self.line_number = self.multi_line_comment_line_number
                 self.write_line_in_files()
                 raise ReachedEOF()
             else:
-                if self.current_character == '\n':
-                    if not self.multi_line_comment_opened:
-                        self.multi_line_comment_opened = True
-                        self.multi_line_comment_line_number = self.line_number
-                    self.write_line_in_files()
-                    self.line_number += 1
                 self.move_pointer()
 
     def get_id_keyword_token(self):
@@ -70,13 +61,9 @@ class Scanner:
             raise ReachedEOF()
         if final_state.token_name == TokenNames.ID_KEYWORD.name:
             token = self.get_id_keyword_token()
-        elif final_state.token_name == TokenNames.WHITESPACE.name:
-            if self.current_lexeme == '\n':
-                self.write_line_in_files()
-                self.line_number += 1
-        elif final_state.token_name == TokenNames.COMMENT.name:
-            if self.multi_line_comment_opened:
-                self.multi_line_comment_opened = False
+        if final_state.new_line_counter > 0:
+            self.write_line_in_files()
+            self.line_number += final_state.new_line_counter
         self.add_token(*token)
         return token
 
