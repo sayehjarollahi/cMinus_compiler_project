@@ -8,17 +8,16 @@ INPUT_FILE_PATH = Path('./input.txt')
 
 
 class Regex(enum.Enum):
+    SLASH = r'/'
     DIGIT = r'\d'
     LETTER = r'[A-Za-z]'
     SYMBOL = r'[;:,\[\]\(\){}\+\-\*=<]'
     WHITESPACE = r'[\x20\x0a\x0d\x09\x0b\x0c ]'
     EOF = r'\x05'
-    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + \
-        '|' + WHITESPACE + '|' + EOF + '|' + '/'
-    NUM_OTHER = SYMBOL + '|' + WHITESPACE + '|' + EOF
+    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + '|' + WHITESPACE + '|' + EOF + '|' + '/'
+    NUM_OTHER = SYMBOL + '|' + WHITESPACE + '|' + EOF + '|'+SLASH
     LETTER_OR_DIGIT = DIGIT + '|' + LETTER
     ID_KEYWORD_OTHER = NUM_OTHER
-    SLASH = r'/'
     NOT_SLASH = r'[^/]'
     BACKSLASH = r'\\'
     INSIDE_ONE_LINE_COMMENT = r'[^\x0a\x05]'
@@ -28,7 +27,7 @@ class Regex(enum.Enum):
     NOT_SLASH_STAR_EOF = r'[^/\*\x05]'
     EQUAL = r'='
     SYMBOL_NOT_EQUAL = r'[;:,\[\]\(\){}\+\-\*<]'
-    SYMBOL_OTHER = DIGIT + '|' + LETTER + '|' + SYMBOL_NOT_EQUAL + '|' + WHITESPACE
+    SYMBOL_OTHER = DIGIT + '|' + LETTER + '|' + SYMBOL_NOT_EQUAL + '|' + WHITESPACE + '|'+SLASH
     SYMBOL_NOT_STAR = r'[;:,\[\]\(\){}\+\-=<]'
     END_LINE = r'\x0a'
 

@@ -13,7 +13,6 @@ def get_all_tokens():
             token_name, token_lexeme = scanner.get_next_token()
             if token_name is TokenNames.ID.name:
                 symbol_table.add(token_lexeme)
-           # print(str(scanner.line_number)+' '+token_name+'{' +token_lexeme+'}')
         except ReachedEOF:
             write_symbol_table_in_file()
             break
