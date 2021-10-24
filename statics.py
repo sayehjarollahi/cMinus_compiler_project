@@ -14,8 +14,9 @@ class Regex(enum.Enum):
     SYMBOL = r'[;:,\[\]\(\){}\+\-\*=<]'
     WHITESPACE = r'[\x20\x0a\x0d\x09\x0b\x0c ]'
     EOF = r'\x05'
-    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + '|' + WHITESPACE + '|' + EOF + '|' + '/'
-    NUM_OTHER = SYMBOL + '|' + WHITESPACE + '|' + EOF + '|'+SLASH
+    ALL_ALLOWED = DIGIT + '|' + LETTER + '|' + SYMBOL + \
+        '|' + WHITESPACE + '|' + EOF + '|' + '/'
+    NUM_OTHER = SYMBOL + '|' + WHITESPACE + '|' + EOF + '|' + SLASH
     LETTER_OR_DIGIT = DIGIT + '|' + LETTER
     ID_KEYWORD_OTHER = NUM_OTHER
     NOT_SLASH = r'[^/]'
@@ -27,7 +28,8 @@ class Regex(enum.Enum):
     NOT_SLASH_STAR_EOF = r'[^/\*\x05]'
     EQUAL = r'='
     SYMBOL_NOT_EQUAL = r'[;:,\[\]\(\){}\+\-\*<]'
-    SYMBOL_OTHER = DIGIT + '|' + LETTER + '|' + SYMBOL_NOT_EQUAL + '|' + WHITESPACE + '|'+SLASH
+    SYMBOL_OTHER = DIGIT + '|' + LETTER + '|' + SYMBOL_NOT_EQUAL + \
+        '|' + WHITESPACE + '|' + SLASH + '|' + EOF
     SYMBOL_NOT_STAR = r'[;:,\[\]\(\){}\+\-=<]'
     END_LINE = r'\x0a'
 
