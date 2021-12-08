@@ -1,7 +1,7 @@
 from typing import List, Tuple, Optional
 from pathlib import Path
 from dfa import DFA, FinalState, InvalidInput, InvalidNumber, UnmatchedComment, UnclosedComment
-from statics import TokenNames, KEYWORDS, ERROR_FILE_PATH
+from statics import TokenNames, KEYWORDS, ERROR_FILE_PATH, IGNORING_TOKEN_NAMES
 
 
 class Scanner:
@@ -19,7 +19,12 @@ class Scanner:
         self.error_messages = []
         self.line_number = 1
 
-    def get_next_token(self) -> Optional[Tuple[str, str]]:
+    def get_next_token(self):
+        token_name, token_lexeme = self.get_unofficial_token()
+        while token_name in IGNORING_TOKEN_NAMES:
+            token_name, token_lexeme = self.get_unofficial_token()
+
+    def get_unofficial_token(self) -> Optional[Tuple[str, str]]:
         while True:
             if self.current_character == '':
                 self.current_character = chr(5)
@@ -40,7 +45,7 @@ class Scanner:
                 self.append_unclosed_comment_lexeme()
                 self.reset_lexem()
                 self.write_line_in_files()
-                raise ReachedEOF()
+                return TokenNames.EOF.name, '$'
             else:
                 self.move_pointer()
 
@@ -58,7 +63,7 @@ class Scanner:
         token = final_state.token_name, self.current_lexeme
         if final_state.token_name == TokenNames.EOF.name:
             self.write_line_in_files()
-            raise ReachedEOF()
+            return TokenNames.EOF.name, '$'
         if final_state.token_name == TokenNames.ID_KEYWORD.name:
             token = self.get_id_keyword_token()
         if final_state.new_line_counter > 0:

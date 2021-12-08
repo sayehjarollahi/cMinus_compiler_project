@@ -9,13 +9,13 @@ def get_all_tokens():
     scanner = Scanner(errors_file_path=ERROR_FILE_PATH, tokens_file_path=TOKENS_FILE_PATH,
                       input_file_path=INPUT_FILE_PATH)
     while True:
-        try:
-            token_name, token_lexeme = scanner.get_next_token()
-            if token_name is TokenNames.ID.name:
-                symbol_table.add(token_lexeme)
-        except ReachedEOF:
+        token_name, token_lexeme = scanner.get_next_token()
+        if token_name is TokenNames.ID.name:
+            symbol_table.add(token_lexeme)
+        elif token_name is TokenNames.EOF.name:
             write_symbol_table_in_file()
             break
+
 
 
 def write_symbol_table_in_file():

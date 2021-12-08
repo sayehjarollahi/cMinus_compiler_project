@@ -45,6 +45,8 @@ class TokenNames(enum.Enum):
     UNMATCHED_COMMENT = 'UNMATCHED_COMMENT'
     EOF = 'EOF'
 
+IGNORING_TOKEN_NAMES = [TokenNames.WHITESPACE.name, TokenNames.COMMENT]
+
 
 STATE0_TRANSITIONS = [
     (1, Regex.DIGIT.value),
@@ -119,4 +121,4 @@ FINAL_STATES = {
     18: (TokenNames.EOF.name, False)
 }
 
-KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
+KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'endif']
