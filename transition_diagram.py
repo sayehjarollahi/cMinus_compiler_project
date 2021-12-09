@@ -1,3 +1,6 @@
+from parser_statics import NON_TERMINALS, TERMINALS, ALL_NODES
+
+
 class NonTerminal:
     __all_non_terminals = []
 
@@ -10,11 +13,18 @@ class NonTerminal:
 
     '''staring node of diagram, first, follow'''
 
-    def get_grammer_by_name(self, name):
+    @staticmethod
+    def get_nonterminal_by_name(name):
         for nonterminal in NonTerminal.__all_non_terminals:
             if nonterminal.name == name:
                 return nonterminal
+        print("PROBLEM IN NONTERMINAL GET BY ID DETECTED")
         return None
+
+    @staticmethod
+    def create_all_non_terminals():
+        for name, first, follow, starting_node in NON_TERMINALS:
+            NonTerminal(name=name.value, first=first, follow=follow, starting_node_id=starting_node)
 
 
 class Node:
@@ -28,7 +38,7 @@ class Node:
 
     '''func is_final
         number
-        list[tuple(edge, next_node)]
+        list[list(edge, next_node, is_edge_nonterminal)]
         '''
 
     @staticmethod
@@ -36,7 +46,24 @@ class Node:
         for node in Node.__all_nodes:
             if node.id == number:
                 return node
+        print('PROBLEM IN NODE BY ID DETECTED!')
         return None
 
+    @staticmethod
+    def correct_references():
+        for node in Node.__all_nodes:
+            node.set_non_terminal_edges()
 
+    def set_non_terminal_edges(self):
+        for child in self.children:
+            if child[0] not in TERMINALS:
+                child[0] = NonTerminal.get_nonterminal_by_name(child[0].value)
+                child[1] = Node.get_node_by_id(child[1])
+
+            child[2] = child[0] not in TERMINALS
+
+    @staticmethod
+    def create_all_nodes():
+        for id, is_final, edges in ALL_NODES:
+            Node(id = id, is_final=is_final, children=edges)
 
