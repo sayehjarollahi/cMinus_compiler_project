@@ -10,6 +10,12 @@ class NonTerminal:
 
     '''staring node of diagram, first, follow'''
 
+    def get_grammer_by_name(self, name):
+        for nonterminal in NonTerminal.__all_non_terminals:
+            if nonterminal.name == name:
+                return nonterminal
+        return None
+
 
 class Node:
     __all_nodes = []
