@@ -1,17 +1,17 @@
-from typing import Tuple, List
-
-
 class NonTerminal:
+    __all_non_terminals = []
+
     def __init__(self, starting_node_id, first, follow, name):
         self.name = name
         self.starting_node = Node.get_node_by_id(starting_node_id)
         self.first = first
         self.follow = follow
+        NonTerminal.__all_non_terminals.append(self)
+
     '''staring node of diagram, first, follow'''
 
 
 class Node:
-
     __all_nodes = []
 
     def __init__(self, id, is_final, children):
@@ -33,4 +33,4 @@ class Node:
         return None
 
 
-EPSILON = 'epsilon'
+
