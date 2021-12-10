@@ -1,6 +1,6 @@
 from parser_file import Parser
 from scanner import Scanner
-from statics import ERROR_FILE_PATH, SYMBOL_TABLE_FILE_PATH, TOKENS_FILE_PATH, INPUT_FILE_PATH, TokenNames
+from statics import ERROR_FILE_PATH, SYMBOL_TABLE_FILE_PATH, TOKENS_FILE_PATH, INPUT_FILE_PATH
 from parser_statics import SYNTAX_ERRORS_FILE_PATH, PARSE_TREE_FILE_PATH
 
 
@@ -15,14 +15,3 @@ open(SYNTAX_ERRORS_FILE_PATH, 'w')
 open(PARSE_TREE_FILE_PATH, 'w')
 parser.run()
 
-
-# file = open(INPUT_FILE_PATH,'r')
-# line=0
-# while True:
-#     next = file.read(1)
-#     line+=1
-#     if re.match(Regex.WHITESPACE.value,next):
-#         print(line,'hi')
-#
-#     if next =='':
-#         break

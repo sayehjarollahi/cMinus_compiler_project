@@ -1,4 +1,6 @@
-from parser_statics import NON_TERMINALS, TERMINALS, ALL_STATES
+import json
+
+from parser_statics import  TERMINALS
 
 
 class NonTerminal:
@@ -31,9 +33,10 @@ class NonTerminal:
 
     @staticmethod
     def create_all_non_terminals():
-        for name, first, follow, starting_state in NON_TERMINALS:
-            NonTerminal(name=name.value, first=first,
-                        follow=follow, starting_state=starting_state)
+        with open('nonterminals.json', 'r') as f:
+            all_nonterminals = json.load(f)
+            for nonterminal in all_nonterminals:
+                NonTerminal(**nonterminal)
 
 
 class State:
@@ -69,8 +72,9 @@ class State:
                 child[0] = NonTerminal.get_nonterminal_by_name(child[0])
             child[1] = State.get_state_by_id(child[1])
 
-
     @staticmethod
     def create_all_states():
-        for id, is_final, edges in ALL_STATES:
-            State(id=id, is_final=is_final, children=edges)
+        with open('states.json', 'r') as f:
+            all_states = json.load(f)
+            for state in all_states:
+                State(**state)

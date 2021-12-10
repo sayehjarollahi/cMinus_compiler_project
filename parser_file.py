@@ -7,7 +7,6 @@ from typing import List, Union
 from anytree import Node, RenderTree
 from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
 
-
 # handle line number for EOF in normal state and unclosed comment error
 
 
@@ -31,6 +30,7 @@ class Parser:
         NonTerminal.create_all_non_terminals()
         State.correct_references()
         NonTerminal.correct_relations()
+
 
     def run(self):
         self.set_next_token()
