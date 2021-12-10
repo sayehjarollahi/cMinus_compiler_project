@@ -87,7 +87,7 @@ class Parser:
             else:
                 Node(f'({self.token_name}, {self.token_lexeme})',
                      parent=self.parent_node)
-            self.set_next_token()
+                self.set_next_token()
             self.present_state = next_state
 
     def handle_error(self):
