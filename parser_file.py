@@ -7,13 +7,16 @@ from typing import List, Union
 from anytree import Node, RenderTree
 from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
 
+
 # handle line number for EOF in normal state and unclosed comment error
 
 
 class Parser:
     # stack, transition diagram, func next_state,
     def __init__(self, scanner: Scanner, syntax_errors_file_path: Path):
+        self.initialize_diagrams()
         self.scanner = scanner
+        print('hi')
         self.present_state = State.get_state_by_id(0)
         self.next_state_stack = []
         self.diagram = NonTerminal.get_nonterminal_by_name(
@@ -23,6 +26,12 @@ class Parser:
         self.parent_node_stack = []
         self.syntax_errors_file_path = syntax_errors_file_path
         self.symbol_table = set(KEYWORDS)
+
+    def initialize_diagrams(self):
+        State.create_all_states()
+        NonTerminal.create_all_non_terminals()
+        State.correct_references()
+        NonTerminal.correct_relations()
 
     def run(self):
         self.reached_EOF = False
@@ -37,7 +46,7 @@ class Parser:
             self.symbol_table.add(self.token_lexeme)
 
     def find_path(self) -> Union[List[Union[NonTerminal, State]], bool]:
-        for edge, next_state in self.present_state.children():
+        for edge, next_state in self.present_state.children:
             if self.is_valid_edge(edge):
                 return edge, next_state
         return False
@@ -45,10 +54,10 @@ class Parser:
     def is_valid_edge(self, edge: Union[NonTerminal, str]) -> bool:
         if isinstance(edge, NonTerminal):
             return (self.token_terminal_parameter in edge.first) or (
-                EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
+                    EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
         else:
             return self.token_terminal_parameter == edge or (
-                edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
+                    edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
         # when present state is final state
@@ -82,7 +91,7 @@ class Parser:
             error = f'#{self.line_number} : syntax error, Unexpected EOF'
             self.write_error_in_file(error)
             return self.handle_EOF()
-        for edge, next_state in self.present_state.children():
+        for edge, next_state in self.present_state.children:
             if isinstance(edge, NonTerminal) and self.token_terminal_parameter in edge.follow:
                 error = f'#{self.line_number} : syntax error, missing {edge.name}'
                 self.present_state = next_state

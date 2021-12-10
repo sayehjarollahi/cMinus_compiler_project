@@ -49,7 +49,7 @@ class DFA:
                 *self.final_states[final_state_number], new_line_counter)
 
 
-def match(character_set: set[str], character: str) -> bool:
+def match(character_set, character: str) -> bool:
     return character in character_set
 
 

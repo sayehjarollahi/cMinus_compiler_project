@@ -21,7 +21,12 @@ class NonTerminal:
         print("PROBLEM IN NONTERMINAL GET BY ID DETECTED")
         return None
 
-    def correct_relations(self):
+    @staticmethod
+    def correct_relations():
+        for nonterminal in NonTerminal.__all_non_terminals:
+            nonterminal.set_starting_state()
+
+    def set_starting_state(self):
         self.starting_state = State.get_state_by_id(self.starting_state)
 
     @staticmethod
@@ -64,7 +69,6 @@ class State:
                 child[0] = NonTerminal.get_nonterminal_by_name(child[0])
                 child[1] = State.get_state_by_id(child[1])
 
-            child[2] = child[0] not in TERMINALS
 
     @staticmethod
     def create_all_states():
