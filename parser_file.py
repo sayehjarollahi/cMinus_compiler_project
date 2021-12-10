@@ -31,7 +31,6 @@ class Parser:
         State.correct_references()
         NonTerminal.correct_relations()
 
-
     def run(self):
         self.set_next_token()
         self.reached_EOF = False
@@ -104,7 +103,7 @@ class Parser:
                 error = f'#{self.line_number} : syntax error, missing {edge.name}\n'
                 self.present_state = next_state
                 return self.write_error_in_file(error)
-            elif not isinstance(edge, NonTerminal):
+            elif not isinstance(edge, NonTerminal) and edge != '$':
                 error = f'#{self.line_number} : syntax error, missing {edge}\n'
                 self.present_state = next_state
                 return self.write_error_in_file(error)
