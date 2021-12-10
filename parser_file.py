@@ -41,7 +41,7 @@ class Parser:
     def set_next_token(self):
         self.token_name, self.token_lexeme, self.line_number = self.scanner.get_next_token()
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
-            TokenNames.SYMBOL.value, TokenNames.KEYWORD.value} else self.token_name
+            TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
         if self.token_name is TokenNames.ID.name:
             self.symbol_table.add(self.token_lexeme)
 
@@ -85,13 +85,16 @@ class Parser:
             if edge == EPSILON:
                 Node(EPSILON, parent=self.parent_node)
             else:
-                Node(f'({self.token_name}, {self.token_lexeme})',
-                     parent=self.parent_node)
+                if self.token_name == TokenNames.EOF.value:
+                    Node(f'{self.token_lexeme}', parent=self.parent_node)
+                else:
+                    Node(f'({self.token_name}, {self.token_lexeme})',
+                         parent=self.parent_node)
                 self.set_next_token()
             self.present_state = next_state
 
     def handle_error(self):
-        if self.token_terminal_parameter == TokenNames.EOF.value:
+        if self.token_name == TokenNames.EOF.value:
             error = f'#{self.line_number} : syntax error, Unexpected EOF\n'
             self.write_error_in_file(error)
             self.parent_node = self.parent_node_stack.pop(0)
@@ -112,6 +115,7 @@ class Parser:
     def handle_EOF(self):
         self.write_symbol_table_in_file()
         self.write_parse_tree_in_file()
+        self.handle_empty_syntax_errors_file()
         self.reached_EOF = True
 
     def write_error_in_file(self, error: str):
@@ -130,6 +134,11 @@ class Parser:
         for index, lexeme in enumerate(self.symbol_table):
             result += f'{index + 1}.\t{lexeme}\n'
         SYMBOL_TABLE_FILE_PATH.write_text(result)
+
+    def handle_empty_syntax_errors_file(self):
+        with open(self.syntax_errors_file_path, 'r+') as syntax_errors_file:
+            if syntax_errors_file.read(1) == '':
+                syntax_errors_file.write('There is no syntax error.')
 
     '''def next_state:
         for state, edge in neighbor_states[self.state]:
