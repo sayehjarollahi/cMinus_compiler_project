@@ -7,6 +7,8 @@ from typing import List, Union
 from anytree import Node, RenderTree
 from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
 
+# handle line number for EOF in normal state and unclosed comment error
+
 
 class Parser:
     # stack, transition diagram, func next_state,
@@ -21,6 +23,11 @@ class Parser:
         self.parent_node_stack = []
         self.syntax_errors_file_path = syntax_errors_file_path
         self.symbol_table = set(KEYWORDS)
+
+    def run(self):
+        self.reached_EOF = False
+        while not self.reached_EOF:
+            self.go_next_state()
 
     def set_next_token(self):
         self.token_name, self.token_lexeme, self.line_number = self.scanner.get_next_token()
@@ -38,10 +45,10 @@ class Parser:
     def is_valid_edge(self, edge: Union[NonTerminal, str]) -> bool:
         if isinstance(edge, NonTerminal):
             return (self.token_terminal_parameter in edge.first) or (
-                        EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
+                EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
         else:
             return self.token_terminal_parameter == edge or (
-                        edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
+                edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
         # when present state is final state
@@ -71,28 +78,27 @@ class Parser:
             self.present_state = next_state
 
     def handle_error(self):
+        if self.token_terminal_parameter == TokenNames.EOF.value:
+            error = f'#{self.line_number} : syntax error, Unexpected EOF'
+            self.write_error_in_file(error)
+            return self.handle_EOF()
         for edge, next_state in self.present_state.children():
-            if self.token_terminal_parameter == TokenNames.EOF.value:
-                error = f'#{self.line_number} : syntax error, Unexpected EOF'
-                self.write_error_in_file(error)
-                return self.handle_EOF()
-            elif isinstance(edge, NonTerminal):
-                if self.token_terminal_parameter in edge.follow:
-                    error = f'#{self.line_number} : syntax error, missing {edge.name}'
-                    self.present_state = next_state
-                    return self.write_error_in_file(error)
-                else:
-                    error = f'#{self.line_number} : syntax error, illegal {self.token_terminal_parameter}'
-                    return self.set_next_token()
+            if isinstance(edge, NonTerminal) and self.token_terminal_parameter in edge.follow:
+                error = f'#{self.line_number} : syntax error, missing {edge.name}'
+                self.present_state = next_state
+                return self.write_error_in_file(error)
             else:
                 error = f'#{self.line_number} : syntax error, missing {edge}'
                 self.present_state = next_state
                 return self.write_error_in_file(error)
+        error = f'#{self.line_number} : syntax error, illegal {self.token_terminal_parameter}'
+        self.write_error_in_file(error)
+        return self.set_next_token()
 
     def handle_EOF(self):
         self.write_symbol_table_in_file()
         self.write_parse_tree_in_file()
-        pass
+        self.reached_EOF = True
 
     def write_error_in_file(self, error: str):
         with open(self.syntax_errors_file_path, 'a') as syntax_errors_file:
