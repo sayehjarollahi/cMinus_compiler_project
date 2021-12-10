@@ -1,6 +1,6 @@
 class NonTerminal:
     pass
-    '''staring node of diagram, first, follow'''
+    '''staring node of diagram, first, follow, name'''
 
 
 class Node:

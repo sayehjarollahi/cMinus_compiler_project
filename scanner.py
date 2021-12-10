@@ -23,6 +23,7 @@ class Scanner:
         token_name, token_lexeme = self.get_unofficial_token()
         while token_name in IGNORING_TOKEN_NAMES:
             token_name, token_lexeme = self.get_unofficial_token()
+        return token_name, token_lexeme, self.line_number
 
     def get_unofficial_token(self) -> Optional[Tuple[str, str]]:
         while True:
