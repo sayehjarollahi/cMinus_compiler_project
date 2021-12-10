@@ -91,6 +91,7 @@ class Parser:
         if self.token_terminal_parameter == TokenNames.EOF.value:
             error = f'#{self.line_number} : syntax error, Unexpected EOF\n'
             self.write_error_in_file(error)
+            self.parent_node = self.parent_node_stack.pop(0)
             return self.handle_EOF()
         for edge, next_state in self.present_state.children:
             if isinstance(edge, NonTerminal) and self.token_terminal_parameter in edge.follow:
@@ -118,7 +119,7 @@ class Parser:
         result = ''
         for pre, fill, node in RenderTree(self.parent_node):
             treestr = u"%s%s" % (pre, node.name)
-            result += treestr.ljust(8) + '\n'
+            result += treestr.ljust(1) + '\n'
         print(result)
         PARSE_TREE_FILE_PATH.write_text(result, encoding='UTF-8')
 
