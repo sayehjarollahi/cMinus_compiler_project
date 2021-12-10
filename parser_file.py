@@ -139,12 +139,3 @@ class Parser:
         with open(self.syntax_errors_file_path, 'r+') as syntax_errors_file:
             if syntax_errors_file.read(1) == '':
                 syntax_errors_file.write('There is no syntax error.')
-
-    '''def next_state:
-        for state, edge in neighbor_states[self.state]:
-            if token in first(edge):
-                return edge, state
-            elif epsilon in first(edge):
-                if next_state(state):
-                    return edge, state  #queue
-        return False'''
