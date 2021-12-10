@@ -6,7 +6,8 @@ from parser_statics import SYNTAX_ERRORS_FILE_PATH, PARSE_TREE_FILE_PATH
 
 scanner = Scanner(errors_file_path=ERROR_FILE_PATH, tokens_file_path=TOKENS_FILE_PATH,
                   input_file_path=INPUT_FILE_PATH)
-parser = Parser(syntax_errors_file_path=SYNTAX_ERRORS_FILE_PATH, scanner=scanner)
+parser = Parser(
+    syntax_errors_file_path=SYNTAX_ERRORS_FILE_PATH, scanner=scanner)
 open(ERROR_FILE_PATH, 'w')
 open(TOKENS_FILE_PATH, 'w')
 open(SYMBOL_TABLE_FILE_PATH, 'w')

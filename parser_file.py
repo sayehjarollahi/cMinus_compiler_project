@@ -54,10 +54,10 @@ class Parser:
     def is_valid_edge(self, edge: Union[NonTerminal, str]) -> bool:
         if isinstance(edge, NonTerminal):
             return (self.token_terminal_parameter in edge.first) or (
-                    EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
+                EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
         else:
             return self.token_terminal_parameter == edge or (
-                    edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
+                edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
         print(self.present_state.id)
@@ -89,19 +89,19 @@ class Parser:
 
     def handle_error(self):
         if self.token_terminal_parameter == TokenNames.EOF.value:
-            error = f'#{self.line_number} : syntax error, Unexpected EOF'
+            error = f'#{self.line_number} : syntax error, Unexpected EOF\n'
             self.write_error_in_file(error)
             return self.handle_EOF()
         for edge, next_state in self.present_state.children:
             if isinstance(edge, NonTerminal) and self.token_terminal_parameter in edge.follow:
-                error = f'#{self.line_number} : syntax error, missing {edge.name}'
+                error = f'#{self.line_number} : syntax error, missing {edge.name}\n'
                 self.present_state = next_state
                 return self.write_error_in_file(error)
-            else:
-                error = f'#{self.line_number} : syntax error, missing {edge}'
+            elif not isinstance(edge, NonTerminal):
+                error = f'#{self.line_number} : syntax error, missing {edge}\n'
                 self.present_state = next_state
                 return self.write_error_in_file(error)
-        error = f'#{self.line_number} : syntax error, illegal {self.token_terminal_parameter}'
+        error = f'#{self.line_number} : syntax error, illegal {self.token_terminal_parameter}\n'
         self.write_error_in_file(error)
         return self.set_next_token()
 
