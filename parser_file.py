@@ -82,8 +82,11 @@ class Parser:
 
             self.parent_node = Node(self.diagram.name, parent=self.parent_node)
         else:
-            Node(f'({self.token_name}, {self.token_lexeme})',
-                 parent=self.parent_node)
+            if edge == EPSILON:
+                Node(EPSILON, parent=self.parent_node)
+            else:
+                Node(f'({self.token_name}, {self.token_lexeme})',
+                     parent=self.parent_node)
             self.set_next_token()
             self.present_state = next_state
 
