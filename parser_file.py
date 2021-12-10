@@ -60,7 +60,6 @@ class Parser:
                 edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
-        print(self.present_state.id)
         # when present state is final state
         if self.present_state.is_final:
             if len(self.next_state_stack) == 0:
@@ -80,6 +79,7 @@ class Parser:
             self.diagram_stack.append(self.diagram)
             self.diagram = edge
             self.parent_node_stack.append(self.parent_node)
+
             self.parent_node = Node(self.diagram.name, parent=self.parent_node)
         else:
             Node(f'({self.token_name}, {self.token_lexeme})',
@@ -120,7 +120,6 @@ class Parser:
         for pre, fill, node in RenderTree(self.parent_node):
             treestr = u"%s%s" % (pre, node.name)
             result += treestr.ljust(1) + '\n'
-        print(result)
         PARSE_TREE_FILE_PATH.write_text(result, encoding='UTF-8')
 
     def write_symbol_table_in_file(self):
