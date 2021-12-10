@@ -1,8 +1,8 @@
 from pathlib import Path
-from parser_statics import PARSE_TREE_FILE_PATH, NonTerminalNames
+from parser_statics import PARSE_TREE_FILE_PATH, NonTerminalNames, EPSILON
 from scanner import Scanner
 from statics import TokenNames
-from transition_diagram import EPSILON, Node, NonTerminal
+from transition_diagram import State, NonTerminal
 from typing import List, Union
 from anytree import Node, RenderTree
 from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
@@ -12,7 +12,7 @@ class Parser:
     # stack, transition diagram, func next_state,
     def __init__(self, scanner: Scanner, syntax_errors_file_path: Path):
         self.scanner = scanner
-        self.present_state = Node.get_node_by_id(0)
+        self.present_state = State.get_state_by_id(0)
         self.next_state_stack = []
         self.diagram = NonTerminal.get_nonterminal_by_name(
             NonTerminalNames.PROGRAM.value)
@@ -29,7 +29,7 @@ class Parser:
         if self.token_name is TokenNames.ID.name:
             self.symbol_table.add(self.token_lexeme)
 
-    def find_path(self) -> Union[List[Union[NonTerminal, Node]], bool]:
+    def find_path(self) -> Union[List[Union[NonTerminal, State]], bool]:
         for edge, next_state in self.present_state.children():
             if self.is_valid_edge(edge):
                 return edge, next_state
@@ -37,9 +37,11 @@ class Parser:
 
     def is_valid_edge(self, edge: Union[NonTerminal, str]) -> bool:
         if isinstance(edge, NonTerminal):
-            return (self.token_terminal_parameter in edge.first) or (EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
+            return (self.token_terminal_parameter in edge.first) or (
+                        EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
         else:
-            return self.token_terminal_parameter == edge or (edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
+            return self.token_terminal_parameter == edge or (
+                        edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
         # when present state is final state
@@ -57,7 +59,7 @@ class Parser:
         edge, next_state = path
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
-            self.present_state = edge.starting_node
+            self.present_state = edge.starting_state
             self.diagram_stack.append(self.diagram)
             self.diagram = edge
             self.parent_node_stack.append(self.parent_node)
@@ -106,7 +108,7 @@ class Parser:
     def write_symbol_table_in_file(self):
         result = ''
         for index, lexeme in enumerate(self.symbol_table):
-            result += f'{index+1}.\t{lexeme}\n'
+            result += f'{index + 1}.\t{lexeme}\n'
         SYMBOL_TABLE_FILE_PATH.write_text(result)
 
     '''def next_state:

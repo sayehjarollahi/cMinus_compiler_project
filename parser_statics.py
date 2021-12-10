@@ -1,6 +1,5 @@
 from enum import Enum
 from pathlib import Path
-from transition_diagram import NonTerminal
 
 EPSILON = 'epsilon'
 SYNTAX_ERRORS_FILE_PATH = Path('syntax_errors.txt')
@@ -59,7 +58,7 @@ class NonTerminalNames(Enum):
         return value in cls._value2member_map_
 
 
-# name, first, follow, starting node id
+# name, first, follow, starting state id
 NON_TERMINALS = [
     (NonTerminalNames.PROGRAM, ['$', 'int', 'void'], ['$'], 0),
     (NonTerminalNames.DECLARATION_LIST, [EPSILON, 'int', 'void'],
@@ -142,7 +141,7 @@ NON_TERMINALS = [
     (NonTerminalNames.ARG_LIST_PRIME, [',', EPSILON, ], [')', ], 158),
 ]
 
-ALL_NODES = [
+ALL_STATES = [
     (0, False, [[NonTerminalNames.DECLARATION_LIST.value, 1], ]),
     (1, False, [['$', 2], ]),
     (2, True, []),
