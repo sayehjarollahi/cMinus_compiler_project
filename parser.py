@@ -4,6 +4,7 @@ from scanner import Scanner
 from statics import TokenNames
 from transition_diagram import EPSILON, Node, NonTerminal
 from typing import List, Union
+from anytree import Node, RenderTree
 
 
 class Parser:
@@ -14,6 +15,9 @@ class Parser:
         self.next_state_stack = []
         self.diagram = NonTerminal.get_nonterminal_by_name(
             NonTerminalNames.PROGRAM.value)
+        self.diagram_stack = []
+        self.parent_node = Node(self.diagram.name)
+        self.parent_node_stack = []
         self.syntax_errors_file_path = syntax_errors_file_path
 
     def set_next_token(self):
@@ -23,11 +27,11 @@ class Parser:
 
     def find_path(self) -> Union[List[Union[NonTerminal, Node]], bool]:
         for edge, next_state in self.present_state.children():
-            if self.is_next_node(edge):
+            if self.is_next_state(edge):
                 return edge, next_state
         return False
 
-    def is_next_node(self, edge: Union[NonTerminal, str]) -> bool:
+    def is_next_state(self, edge: Union[NonTerminal, str]) -> bool:
         if isinstance(edge, NonTerminal):
             return (self.token_terminal_parameter in edge.first) or (EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
         else:
@@ -40,25 +44,37 @@ class Parser:
                 return self.handle_end_parser()
             else:
                 self.present_state = self.next_state_stack.pop()
+                self.diagram = self.diagram_stack.pop()
+                self.parent_node = self.parent_node_stack.pop()
                 return
         path = self.find_path()
         if not path:
             return self.handle_error()
         edge, next_state = path
         if isinstance(edge, NonTerminal):
-            add_anytree((edge.name))
             self.next_state_stack.append(next_state)
             self.present_state = edge.starting_node
+            self.diagram_stack.append(self.diagram)
             self.diagram = edge
+            self.parent_node_stack.append(self.parent_node)
+            self.parent_node = Node(self.diagram.name, parent=self.parent_node)
         else:
-            add_anytree((self.token_name, self.token_lexeme))
+            Node(f'({self.token_name}, {self.token_lexeme})',
+                 parent=self.parent_node)
             self.set_next_token()
             self.present_state = next_state
 
     def handle_error(self):
         for edge, next_state in self.present_state.children():
+            # handle EOF
             if isinstance(edge, NonTerminal):
-                pass
+                if self.token_terminal_parameter in edge.follow:
+                    error = f'#{self.line_number} : syntax error, missing {edge.name}'
+                    self.present_state = next_state
+                    return self.write_error_in_file(error)
+                else:
+                    error = f'#{self.line_number} : syntax error, illegal {self.token_terminal_parameter}'
+                    return self.set_next_token()
             else:
                 error = f'#{self.line_number} : syntax error, missing {edge}'
                 self.present_state = next_state
@@ -71,6 +87,11 @@ class Parser:
         with open(self.syntax_errors_file_path, 'a') as syntax_errors_file:
             syntax_errors_file.write(error)
 
+    def print_tree(self):
+        for pre, fill, node in RenderTree(self.parent_node):
+            treestr = u"%s%s" % (pre, node.name)
+            print(treestr.ljust(8))
+
     '''def next_state:
         for state, edge in neighbor_states[self.state]:
             if token in first(edge):
@@ -79,4 +100,3 @@ class Parser:
                 if next_state(state):
                     return edge, state  #queue
         return False'''
-    # def handle_error()
