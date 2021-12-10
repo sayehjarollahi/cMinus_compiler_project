@@ -1,6 +1,10 @@
 from enum import Enum
+from pathlib import Path
+from transition_diagram import NonTerminal
 
 EPSILON = 'epsilon'
+SYNTAX_ERRORS_FILE_PATH = Path('syntax_errors.txt')
+PARSE_TREE_FILE_PATH = Path('parse_tree.txt')
 
 
 class NonTerminalNames(Enum):
