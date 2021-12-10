@@ -46,7 +46,7 @@ class TokenNames(enum.Enum):
     EOF = 'EOF'
 
 
-IGNORING_TOKEN_NAMES = [TokenNames.WHITESPACE.name, TokenNames.COMMENT]
+IGNORING_TOKEN_NAMES = [TokenNames.WHITESPACE.name, TokenNames.COMMENT.name]
 
 
 STATE0_TRANSITIONS = [
