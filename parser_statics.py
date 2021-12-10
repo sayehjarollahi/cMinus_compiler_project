@@ -4,6 +4,8 @@ from pathlib import Path
 EPSILON = 'epsilon'
 SYNTAX_ERRORS_FILE_PATH = Path('syntax_errors.txt')
 PARSE_TREE_FILE_PATH = Path('parse_tree.txt')
+STATES_FILE_PATH = Path('states.json')
+NONTERMINALS_FILE_PATH = Path('nonterminals.json')
 
 
 class NonTerminalNames(Enum):

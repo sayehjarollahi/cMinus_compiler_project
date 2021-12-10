@@ -1,3 +1,4 @@
+from pathlib import Path
 from parser_file import Parser
 from scanner import Scanner
 from statics import ERROR_FILE_PATH, SYMBOL_TABLE_FILE_PATH, TOKENS_FILE_PATH, INPUT_FILE_PATH
@@ -14,4 +15,3 @@ open(SYMBOL_TABLE_FILE_PATH, 'w')
 open(SYNTAX_ERRORS_FILE_PATH, 'w')
 open(PARSE_TREE_FILE_PATH, 'w')
 parser.run()
-

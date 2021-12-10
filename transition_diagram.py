@@ -1,6 +1,6 @@
 import json
 
-from parser_statics import  TERMINALS
+from parser_statics import NONTERMINALS_FILE_PATH, STATES_FILE_PATH, TERMINALS
 
 
 class NonTerminal:
@@ -33,8 +33,8 @@ class NonTerminal:
 
     @staticmethod
     def create_all_non_terminals():
-        with open('nonterminals.json', 'r') as f:
-            all_nonterminals = json.load(f)
+        with open(NONTERMINALS_FILE_PATH, 'r') as nonterminals_input_file:
+            all_nonterminals = json.load(nonterminals_input_file)
             for nonterminal in all_nonterminals:
                 NonTerminal(**nonterminal)
 
@@ -74,7 +74,7 @@ class State:
 
     @staticmethod
     def create_all_states():
-        with open('states.json', 'r') as f:
-            all_states = json.load(f)
+        with open(STATES_FILE_PATH, 'r') as states_input_file:
+            all_states = json.load(states_input_file)
             for state in all_states:
                 State(**state)
