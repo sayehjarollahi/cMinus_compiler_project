@@ -16,7 +16,6 @@ class Parser:
     def __init__(self, scanner: Scanner, syntax_errors_file_path: Path):
         self.initialize_diagrams()
         self.scanner = scanner
-        print('hi')
         self.present_state = State.get_state_by_id(0)
         self.next_state_stack = []
         self.diagram = NonTerminal.get_nonterminal_by_name(
@@ -61,6 +60,7 @@ class Parser:
                     edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
+        print(self.present_state.id)
         # when present state is final state
         if self.present_state.is_final:
             if len(self.next_state_stack) == 0:
@@ -119,7 +119,8 @@ class Parser:
         for pre, fill, node in RenderTree(self.parent_node):
             treestr = u"%s%s" % (pre, node.name)
             result += treestr.ljust(8) + '\n'
-        PARSE_TREE_FILE_PATH.write_text(result)
+        print(result)
+        PARSE_TREE_FILE_PATH.write_text(result, encoding='UTF-8')
 
     def write_symbol_table_in_file(self):
         result = ''
