@@ -55,10 +55,10 @@ class Parser:
     def is_valid_edge(self, edge: Union[NonTerminal, str]) -> bool:
         if isinstance(edge, NonTerminal):
             return (self.token_terminal_parameter in edge.first) or (
-                EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
+                    EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
         else:
             return self.token_terminal_parameter == edge or (
-                edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
+                    edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
         # when present state is final state

@@ -47,7 +47,7 @@ class State:
 
     '''func is_final
         number
-        list[list(edge, next_state, is_edge_nonterminal)]
+        list[list(edge, next_state,)]
         '''
 
     @staticmethod
@@ -67,7 +67,7 @@ class State:
         for child in self.children:
             if child[0] not in TERMINALS:
                 child[0] = NonTerminal.get_nonterminal_by_name(child[0])
-                child[1] = State.get_state_by_id(child[1])
+            child[1] = State.get_state_by_id(child[1])
 
 
     @staticmethod
