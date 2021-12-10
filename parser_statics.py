@@ -64,7 +64,8 @@ NON_TERMINALS = [
      ['$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}'], 3),
     (NonTerminalNames.DECLARATION, ['int', 'void'],
      ['int', 'void', '$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}'], 6),
-    (NonTerminalNames.DECLARATION_INITIAL, ['int', 'void'], ['(', '[', ';', ',', ')'], 9),
+    (NonTerminalNames.DECLARATION_INITIAL, [
+     'int', 'void'], ['(', '[', ';', ',', ')'], 9),
     (NonTerminalNames.DECLARATION_PRIME, ['(', '[', ';'],
      ['int', 'void', '$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}'], 12),
     (NonTerminalNames.VAR_DECLARATION_PRIME, ['[', ';'],
@@ -95,28 +96,45 @@ NON_TERMINALS = [
      ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif', 'else', 'until', ], 73),
     (NonTerminalNames.RETURN_STMT_PRIME, [';', 'ID', '(', 'NUM', ],
      ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif', 'else', 'until', ], 76),
-    (NonTerminalNames.EXPRESSION, ['ID', '(', 'NUM', ], [';', ')', ']', ',', ], 79),
-    (NonTerminalNames.B, ['=', '[', '(', '*', '+', '-', '<', '==', EPSILON, ], [';', ')', ']', ',', ], 82),
-    (NonTerminalNames.H, ['=', '*', EPSILON, '+', '-', '<', '==', ], [';', ')', ']', ',', ], 88),
-    (NonTerminalNames.SIMPLE_EXPRESSION_ZEGOND, ['(', 'NUM', ], [';', ')', ']', ',', ], 93),
-    (NonTerminalNames.SIMPLE_EXPRESSION_PRIME, ['(', '*', '+', '-', '<', '==', EPSILON, ], [';', ')', ']', ',', ], 96),
+    (NonTerminalNames.EXPRESSION, [
+     'ID', '(', 'NUM', ], [';', ')', ']', ',', ], 79),
+    (NonTerminalNames.B, ['=', '[', '(', '*', '+', '-',
+     '<', '==', EPSILON, ], [';', ')', ']', ',', ], 82),
+    (NonTerminalNames.H, ['=', '*', EPSILON, '+',
+     '-', '<', '==', ], [';', ')', ']', ',', ], 88),
+    (NonTerminalNames.SIMPLE_EXPRESSION_ZEGOND, [
+     '(', 'NUM', ], [';', ')', ']', ',', ], 93),
+    (NonTerminalNames.SIMPLE_EXPRESSION_PRIME, [
+     '(', '*', '+', '-', '<', '==', EPSILON, ], [';', ')', ']', ',', ], 96),
     (NonTerminalNames.C, [EPSILON, '<', '==', ], [';', ')', ']', ',', ], 99),
     (NonTerminalNames.RELOP, ['<', '==', ], ['(', 'ID', 'NUM', ], 102),
-    (NonTerminalNames.ADDITIVE_EXPRESSION, ['(', 'ID', 'NUM', ], [';', ')', ']', ',', ], 104),
+    (NonTerminalNames.ADDITIVE_EXPRESSION, [
+     '(', 'ID', 'NUM', ], [';', ')', ']', ',', ], 104),
     (NonTerminalNames.ADDITIVE_EXPRESSION_PRIME, ['(', '*', '+', '-', EPSILON, ], ['<', '==', ';', ')', ']', ',', ],
      107),
-    (NonTerminalNames.ADDITIVE_EXPRESSION_ZEGOND, ['(', 'NUM', ], ['<', '==', ';', ')', ']', ',', ], 110),
-    (NonTerminalNames.D, [EPSILON, '+', '-', ], ['*', '<', '==', ';', ')', ']', ',', ], 113),
+    (NonTerminalNames.ADDITIVE_EXPRESSION_ZEGOND, [
+     '(', 'NUM', ], ['<', '==', ';', ')', ']', ',', ], 110),
+    (NonTerminalNames.D, [EPSILON, '+', '-', ],
+     ['*', '<', '==', ';', ')', ']', ',', ], 113),
     (NonTerminalNames.ADDOP, ['+', '-', ], ['(', 'ID', 'NUM', ], 117),
-    (NonTerminalNames.TERM, ['(', 'ID', 'NUM', ], ['+', '-', ';', ')', '*', '<', '==', ']', ',', ], 119),
-    (NonTerminalNames.TERM_PRIME, ['(', '*', EPSILON, ], ['+', '-', '<', '==', ';', ')', ']', ',', ], 122),
-    (NonTerminalNames.TERM_ZEGOND, ['(', 'NUM', ], ['+', '-', '<', '==', ';', ')', ']', ',', ], 125),
-    (NonTerminalNames.G, ['*', EPSILON, ], ['<', '==', ';', ')', '+', '-', '*', ']', ',', ], 128),
-    (NonTerminalNames.FACTOR, ['(', 'ID', 'NUM', ], ['*', '+', '-', ';', ')', '<', '==', ']', ',', ], 132),
-    (NonTerminalNames.VAR_CALL_PRIME, ['(', '[', EPSILON, ], ['*', '+', '-', ';', ')', '<', '==', ']', ',', ], 137),
-    (NonTerminalNames.VAR_PRIME, ['[', EPSILON, ], ['*', '+', '-', ';', ')', '<', '==', ']', ',', ], 141),
-    (NonTerminalNames.FACTOR_PRIME, ['(', EPSILON, ], ['*', '+', '-', '<', '==', ';', ')', ']', ',', ], 145),
-    (NonTerminalNames.FACTOR_ZEGOND, ['(', 'NUM', ], ['*', '+', '-', '<', '==', ';', ')', ']', ',', ], 149),
+    (NonTerminalNames.TERM, ['(', 'ID', 'NUM', ], [
+     '+', '-', ';', ')', '*', '<', '==', ']', ',', ], 119),
+    (NonTerminalNames.TERM_PRIME, [
+     '(', '*', EPSILON, ], ['+', '-', '<', '==', ';', ')', ']', ',', ], 122),
+    (NonTerminalNames.TERM_ZEGOND, ['(', 'NUM', ], [
+     '+', '-', '<', '==', ';', ')', ']', ',', ], 125),
+    (NonTerminalNames.G, ['*', EPSILON, ],
+     ['<', '==', ';', ')', '+', '-', '*', ']', ',', ], 128),
+    (NonTerminalNames.FACTOR, ['(', 'ID', 'NUM', ], [
+     '*', '+', '-', ';', ')', '<', '==', ']', ',', ], 132),
+    (NonTerminalNames.VAR_CALL_PRIME, [
+     '(', '[', EPSILON, ], ['*', '+', '-', ';', ')', '<', '==', ']', ',', ], 137),
+    (NonTerminalNames.VAR_PRIME, ['[', EPSILON, ], [
+     '*', '+', '-', ';', ')', '<', '==', ']', ',', ], 141),
+    (NonTerminalNames.FACTOR_PRIME, ['(', EPSILON, ], [
+     '*', '+', '-', '<', '==', ';', ')', ']', ',', ], 145),
+    (NonTerminalNames.FACTOR_ZEGOND, ['(', 'NUM', ], [
+     '*', '+', '-', '<', '==', ';', ')', ']', ',', ], 149),
     (NonTerminalNames.ARGS, [EPSILON, 'ID', '(', 'NUM', ], [')', ], 153),
     (NonTerminalNames.ARG_LIST, ['ID', '(', 'NUM', ], [')', ], 155),
     (NonTerminalNames.ARG_LIST_PRIME, [',', EPSILON, ], [')', ], 158),
@@ -135,7 +153,8 @@ ALL_NODES = [
     (9, False, [[NonTerminalNames.TYPE_SPECIFIER, 10]]),
     (10, False, [['ID', 11]]),
     (11, True, []),
-    (12, False, [[NonTerminalNames.FUN_DECLARATION_PRIME, 13], [NonTerminalNames.VAR_DECLARATION_PRIME, 13]]),
+    (12, False, [[NonTerminalNames.FUN_DECLARATION_PRIME, 13],
+     [NonTerminalNames.VAR_DECLARATION_PRIME, 13]]),
     (13, True, []),
     (14, False, [[';', 18], ['[', 15]]),
     (15, False, [['NUM', 16]]),
@@ -147,9 +166,9 @@ ALL_NODES = [
     (21, False, [[')', 22]]),
     (22, False, [[NonTerminalNames.COMPOUND_STMT, 23]]),
     (23, True, []),
-    (24, False, [['int', 25],['void', 25]]),
+    (24, False, [['int', 25], ['void', 25]]),
     (25, True, []),
-    (26, False, [['int', 27],['void', 30]]),
+    (26, False, [['int', 27], ['void', 30]]),
     (27, False, [['ID', 28]]),
     (28, False, [[NonTerminalNames.PARAM_PRIME, 29]]),
     (29, False, [[NonTerminalNames.PARAM_LIST, 30]]),
@@ -161,7 +180,7 @@ ALL_NODES = [
     (35, False, [[NonTerminalNames.DECLARATION_INITIAL, 36]]),
     (36, False, [[NonTerminalNames.PARAM_PRIME, 37]]),
     (37, True, []),
-    (38, False, [['[', 39], [EPSILON,40]]),
+    (38, False, [['[', 39], [EPSILON, 40]]),
     (39, False, [[']', 40]]),
     (40, True, []),
     (41, False, [['{', 42]]),
@@ -169,12 +188,13 @@ ALL_NODES = [
     (43, False, [[NonTerminalNames.STATEMENT_LIST, 44]]),
     (44, False, [['}', 45]]),
     (45, True, []),
-    (46, False, [[NonTerminalNames.STATEMENT, 47],[EPSILON, 48]]),
+    (46, False, [[NonTerminalNames.STATEMENT, 47], [EPSILON, 48]]),
     (47, False, [[NonTerminalNames.STATEMENT_LIST, 48]]),
     (48, True, []),
-    (49, False, [[NonTerminalNames.EXPRESSION_STMT,50],[NonTerminalNames.COMPOUND_STMT,50],[NonTerminalNames.SELECTION_STMT,50],[NonTerminalNames.ITERATION_STMT,50],[NonTerminalNames.RETURN_STMT,50]]),
+    (49, False, [[NonTerminalNames.EXPRESSION_STMT, 50], [NonTerminalNames.COMPOUND_STMT, 50], [
+     NonTerminalNames.SELECTION_STMT, 50], [NonTerminalNames.ITERATION_STMT, 50], [NonTerminalNames.RETURN_STMT, 50]]),
     (50, True, []),
-    (51, False, [[NonTerminalNames.EXPRESSION, 52],['break', 53],[';', 54]]),
+    (51, False, [[NonTerminalNames.EXPRESSION, 52], ['break', 53], [';', 54]]),
     (52, False, [[';', 54]]),
     (53, False, [[';', 54]]),
     (54, True, []),
@@ -289,6 +309,5 @@ ALL_NODES = [
 
 ]
 
-TERMINALS = ['$', EPSILON, 'ID', ';', '[',']','NUM', '(',')', 'int', 'void', ',', '{','}', 'break', 'if', 'endif', 'else', 'repeat', 'until', 'return', '=','==','<','+','-','*',]
-
-
+TERMINALS = ['$', EPSILON, 'ID', ';', '[', ']', 'NUM',
+             '(', ')', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'repeat', 'until', 'return', '=', '==', '<', '+', '-', '*', ]
