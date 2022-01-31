@@ -50,7 +50,7 @@ class State:
 
     '''func is_final
         number
-        list[list(edge, next_state,)]
+        list[list(edge, next_state, action_symbol)]
         '''
 
     @staticmethod
