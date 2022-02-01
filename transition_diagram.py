@@ -77,4 +77,7 @@ class State:
         with open(STATES_FILE_PATH, 'r') as states_input_file:
             all_states = json.load(states_input_file)
             for state in all_states:
-                State(**state)
+                temp = State(**state)
+                for child in temp.children:
+                    if len(child)==2:
+                        child.append(False)

@@ -27,6 +27,7 @@ class CodeGenerator:
                 return row['address']
 
     def sa_assign(self):
+        self.add_file()
         self.generate_formatted_code(
             'ASSIGN', self.semantic_stack[-1], self.semantic_stack[-2], '')
         self.semantic_stack.pop()
@@ -53,17 +54,18 @@ class CodeGenerator:
 
     def sa_add_array(self):
         array_len = self.semantic_stack.pop()
-        for i in range(array_len - 1):
+        for i in range(int(array_len) - 1):
             empty_cell = self.data_block.get_first_empty_cell()
             self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
         symbol_row = self.get_symbol_row(self.current_id)
         symbol_row['cell_No'] = array_len
 
     def sa_add_id(self):
-        empty_cell = self.data_block.get_first_empty_cell()
         symbol_row = self.get_symbol_row(self.current_id)
-        symbol_row['address'] = empty_cell
-        self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
+        if symbol_row['type']=='int':
+            empty_cell = self.data_block.get_first_empty_cell()
+            symbol_row['address'] = empty_cell
+            self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
 
     def sa_add_id_param(self):
         empty_cell = self.data_block.get_first_empty_cell()
@@ -79,7 +81,7 @@ class CodeGenerator:
 
     def get_symbol_row(self, lexeme):
         for block in self.symbol_table:
-            if block['lexeme'] == lexeme:
+            if isinstance(block, dict) and block['lexeme'] == lexeme:
                 return block
         return None
 
@@ -104,6 +106,8 @@ class CodeGenerator:
         self.symbol_table[-1]['declaration type'] = 'param'
 
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
+        print(token_name, token_lexeme, action_symbols)
+        print(self.symbol_table)
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
         elif token_name == TokenNames.NUM.value:
@@ -124,12 +128,15 @@ class CodeGenerator:
 class Stack(list):
     def __init__(self, starting_index: int):
         self.starting_index = starting_index
+        self.filled_cells = 0
 
     def insert(self, __index, __object) -> None:
         return super().insert(int((__index - self.starting_index) / 4), __object)
 
     def get_first_empty_cell(self) -> int:
-        return self.starting_index + 4 * self.__len__
+        empty_cell = self.starting_index + 4 * self.filled_cells
+        self.filled_cells += 1
+        return empty_cell
 
 
 class Record:

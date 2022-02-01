@@ -4,7 +4,7 @@ from parser_statics import PARSE_TREE_FILE_PATH, NonTerminalNames, EPSILON
 from scanner import Scanner
 from statics import TokenNames
 from transition_diagram import State, NonTerminal
-from typing import List, Union
+from typing import List, Union, Tuple, Any
 from anytree import Node, RenderTree
 from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
 
@@ -47,10 +47,10 @@ class Parser:
         if self.token_name is TokenNames.ID.name:
             self.symbol_table[-1]['lexeme'] = self.token_lexeme
 
-    def find_path(self) -> Union[List[Union[NonTerminal, State]], bool]:
-        for edge, next_state in self.present_state.children:
+    def find_path(self) -> Tuple[Any, Any, Any]:
+        for edge, next_state, action_symbol in self.present_state.children:
             if self.is_valid_edge(edge):
-                return edge, next_state
+                return edge, next_state, action_symbol
         return False
 
     def is_valid_edge(self, edge: Union[NonTerminal, str]) -> bool:
