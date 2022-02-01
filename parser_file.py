@@ -44,10 +44,10 @@ class Parser:
         self.token_name, self.token_lexeme, self.line_number = self.scanner.get_next_token()
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
             TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
-        if self.token_name is TokenNames.ID.name:
+        if self.token_name is TokenNames.ID.name and 'lexeme' not in self.symbol_table[-1]:
             self.symbol_table[-1]['lexeme'] = self.token_lexeme
 
-    def find_path(self) -> Tuple[Any, Any, Any]:
+    def find_path(self) -> Union[Tuple[Any, Any, Any], bool]:
         for edge, next_state, action_symbol in self.present_state.children:
             if self.is_valid_edge(edge):
                 return edge, next_state, action_symbol
