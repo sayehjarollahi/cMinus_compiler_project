@@ -1,4 +1,5 @@
 from pathlib import Path
+from code_generator import CodeGenerator
 from parser_statics import PARSE_TREE_FILE_PATH, NonTerminalNames, EPSILON
 from scanner import Scanner
 from statics import TokenNames
@@ -12,7 +13,7 @@ from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
 
 class Parser:
     # stack, transition diagram, func next_state,
-    def __init__(self, scanner: Scanner, syntax_errors_file_path: Path):
+    def __init__(self, scanner: Scanner, syntax_errors_file_path: Path, code_generator: CodeGenerator):
         self.initialize_diagrams()
         self.scanner = scanner
         self.present_state = State.get_state_by_id(0)
@@ -24,7 +25,7 @@ class Parser:
         self.parent_node_stack = []
         self.syntax_errors_file_path = syntax_errors_file_path
         self.symbol_table = set(KEYWORDS)
-
+        self.code_generator = code_generator
 
     def initialize_diagrams(self):
         State.create_all_states()
@@ -43,9 +44,7 @@ class Parser:
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
             TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
         if self.token_name is TokenNames.ID.name:
-            #TODO
             self.symbol_table.add(self.token_lexeme)
-
 
     def find_path(self) -> Union[List[Union[NonTerminal, State]], bool]:
         for edge, next_state in self.present_state.children:
@@ -74,7 +73,7 @@ class Parser:
         path = self.find_path()
         if not path:
             return self.handle_error()
-        edge, next_state = path
+        edge, next_state, action_symbol = path
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
             self.present_state = edge.starting_state
@@ -94,6 +93,9 @@ class Parser:
                          parent=self.parent_node)
                 self.set_next_token()
             self.present_state = next_state
+        if action_symbol:
+            self.code_generator.handle_action_symbol(
+                edge, self.token_lexeme, action_symbol)
 
     def handle_error(self):
         if self.token_name == TokenNames.EOF.value:
