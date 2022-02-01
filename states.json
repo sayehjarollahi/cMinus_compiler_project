@@ -84,7 +84,8 @@
     "children": [
       [
         "Type-specifier",
-        10
+        10,
+        ["sa_add_type"]
       ]
     ]
   },
@@ -94,7 +95,8 @@
     "children": [
       [
         "ID",
-        11
+        11,
+        ["sa_add_id"]
       ]
     ]
   },
@@ -109,7 +111,8 @@
     "children": [
       [
         "Fun-declaration-prime",
-        13
+        13,
+        ["sa_dec_type_func"]
       ],
       [
         "Var-declaration-prime",
@@ -128,7 +131,8 @@
     "children": [
       [
         ";",
-        18
+        18,
+        ["sa_dec_type_var"]
       ],
       [
         "[",
@@ -142,7 +146,8 @@
     "children": [
       [
         "NUM",
-        16
+        16,
+        ["sa_push_num"]
       ]
     ]
   },
@@ -152,7 +157,8 @@
     "children": [
       [
         "]",
-        17
+        17,
+        ["sa_add_array"]
       ]
     ]
   },
@@ -162,7 +168,8 @@
     "children": [
       [
         ";",
-        18
+        18,
+        ["sa_dec_type_arr"]
       ]
     ]
   },
@@ -241,7 +248,8 @@
     "children": [
       [
         "int",
-        27
+        27,
+        ["sa_add_int_param"]
       ],
       [
         "void",
@@ -255,7 +263,8 @@
     "children": [
       [
         "ID",
-        28
+        28,
+        ["sa_add_id_param","sa_dec_type_param"]
       ]
     ]
   },
@@ -383,7 +392,8 @@
     "children": [
       [
         "{",
-        42
+        42,
+        ["sa_start_scope"]
       ]
     ]
   },
@@ -413,7 +423,8 @@
     "children": [
       [
         "}",
-        45
+        45,
+        ["sa_end_scope"]
       ]
     ]
   },
@@ -506,7 +517,8 @@
     "children": [
       [
         ";",
-        54
+        54,
+        ["sa_pop"]
       ]
     ]
   },
@@ -801,7 +813,8 @@
     "children": [
       [
         "Expression",
-        87
+        87,
+        ["sa_assign"]
       ]
     ]
   },
@@ -821,7 +834,8 @@
     "children": [
       [
         "]",
-        86
+        86,
+        ["sa_compute_addr_arr"]
       ]
     ]
   },
@@ -885,7 +899,8 @@
     "children": [
       [
         "Expression",
-        91
+        91,
+        ["sa_assign"]
       ]
     ]
   },
@@ -1248,7 +1263,8 @@
       ],
       [
         "NUM",
-        135
+        135,
+        ["sa_push_num"]
       ]
     ]
   },
@@ -1414,7 +1430,8 @@
       ],
       [
         "NUM",
-        152
+        152,
+        ["sa_push_num"]
       ]
     ]
   },
