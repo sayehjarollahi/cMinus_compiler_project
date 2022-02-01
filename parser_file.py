@@ -24,7 +24,7 @@ class Parser:
         self.parent_node = Node(self.diagram.name)
         self.parent_node_stack = []
         self.syntax_errors_file_path = syntax_errors_file_path
-        self.symbol_table = set(KEYWORDS)
+        self.symbol_table = list(KEYWORDS)
         self.code_generator = code_generator
 
     def initialize_diagrams(self):
@@ -44,7 +44,7 @@ class Parser:
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
             TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
         if self.token_name is TokenNames.ID.name:
-            self.symbol_table.add(self.token_lexeme)
+            self.symbol_table[-1]['lexeme'] = self.token_lexeme
 
     def find_path(self) -> Union[List[Union[NonTerminal, State]], bool]:
         for edge, next_state in self.present_state.children:
@@ -74,13 +74,15 @@ class Parser:
         if not path:
             return self.handle_error()
         edge, next_state, action_symbol = path
+        if action_symbol:
+            self.code_generator.handle_action_symbol(
+                self.token_name, self.token_lexeme, action_symbol)
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
             self.present_state = edge.starting_state
             self.diagram_stack.append(self.diagram)
             self.diagram = edge
             self.parent_node_stack.append(self.parent_node)
-
             self.parent_node = Node(self.diagram.name, parent=self.parent_node)
         else:
             if edge == EPSILON:
@@ -93,9 +95,6 @@ class Parser:
                          parent=self.parent_node)
                 self.set_next_token()
             self.present_state = next_state
-        if action_symbol:
-            self.code_generator.handle_action_symbol(
-                edge, self.token_lexeme, action_symbol)
 
     def handle_error(self):
         if self.token_name == TokenNames.EOF.value:

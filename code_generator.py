@@ -1,5 +1,10 @@
+from ctypes import Union
+from typing import Dict, List
+from statics import TokenNames
+
+
 class CodeGenerator:
-    def __init__(self, symbol_table):
+    def __init__(self, symbol_table: List[Dict[str, Union[str, int]]]):
         self.AR = []
         self.semantic_stack = []
         self.program_block = Stack(0)
@@ -9,6 +14,8 @@ class CodeGenerator:
         self.symbol_table = symbol_table
         self.current_id = None
         self.current_num = None
+        self.current_keyword = None
+        self.scope_stack = [0]
 
     def get_temp(self) -> int:
         return self.temporary_block.get_first_empty_cell()
@@ -55,9 +62,14 @@ class CodeGenerator:
         empty_cell = self.data_block.get_first_empty_cell()
         symbol_row = self.get_symbol_row(self.current_id)
         symbol_row['address'] = empty_cell
-        self.semantic_stack.append(empty_cell)
-        self.semantic_stack.append('#0')
-        self.sa_assign()
+        self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
+
+    def sa_start_scope(self):
+        self.scope_stack.append(len(self.symbol_table))
+
+    def sa_end_scope(self):
+        last_scope = self.scope_stack.pop()
+        del self.symbol_table[last_scope:]
 
     def get_symbol_row(self, lexeme):
         for block in self.symbol_table:
@@ -65,11 +77,39 @@ class CodeGenerator:
                 return block
         return None
 
-    def handle_action_symbol(self, edge: str, lexeme: str, action_symbol: str):
-        if edge == 'ID':
-            self.current_id = lexeme
-        elif edge == 'NUM':
-            self.current_num = lexeme
+    def sa_add_type(self):
+        self.symbol_table.append(
+            dict(type=self.current_keyword, scope=len(self.scope_stack)))
+
+    def sa_add_int_param(self):
+        self.symbol_table.append(
+            dict(type='int', scope=len(self.scope_stack)+1))
+
+    def sa_dec_type_func(self):
+        row = self.get_symbol_row(self.current_id)
+        row['declaration type'] = 'func'
+
+    def sa_dec_type_arr(self):
+        row = self.get_symbol_row(self.current_id)
+        row['declaration type'] = 'arr'
+
+    def sa_dec_type_var(self):
+        row = self.get_symbol_row(self.current_id)
+        row['declaration type'] = 'var'
+
+    def sa_dec_type_param(self):
+        row = self.get_symbol_row(self.current_id)
+        row['declaration type'] = 'param'
+
+    def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
+        if token_name == TokenNames.ID.value:
+            self.current_id = token_lexeme
+        elif token_name == TokenNames.NUM.value:
+            self.current_num = token_lexeme
+        elif token_name == TokenNames.KEYWORD.value:
+            self.current_keyword = token_lexeme
+        for action_symbol in action_symbols:
+            getattr(self, action_symbol)()
 
     def generate_formatted_code(self, relop: str, s1, s2, s3):
         self.program_block.append(f'({relop}, {(s1)}, {s2}, {s3})')
