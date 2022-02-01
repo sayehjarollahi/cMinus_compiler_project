@@ -64,6 +64,11 @@ class CodeGenerator:
         symbol_row['address'] = empty_cell
         self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
 
+    def sa_add_id_param(self):
+        empty_cell = self.data_block.get_first_empty_cell()
+        symbol_row = self.get_symbol_row(self.current_id)
+        symbol_row['address'] = empty_cell
+
     def sa_start_scope(self):
         self.scope_stack.append(len(self.symbol_table))
 
@@ -86,20 +91,16 @@ class CodeGenerator:
             dict(type='int', scope=len(self.scope_stack)+1))
 
     def sa_dec_type_func(self):
-        row = self.get_symbol_row(self.current_id)
-        row['declaration type'] = 'func'
+        self.symbol_table[-1]['declaration type'] = 'func'
 
     def sa_dec_type_arr(self):
-        row = self.get_symbol_row(self.current_id)
-        row['declaration type'] = 'arr'
+        self.symbol_table[-1]['declaration type'] = 'arr'
 
     def sa_dec_type_var(self):
-        row = self.get_symbol_row(self.current_id)
-        row['declaration type'] = 'var'
+        self.symbol_table[-1]['declaration type'] = 'var'
 
     def sa_dec_type_param(self):
-        row = self.get_symbol_row(self.current_id)
-        row['declaration type'] = 'param'
+        self.symbol_table[-1]['declaration type'] = 'param'
 
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
         if token_name == TokenNames.ID.value:
