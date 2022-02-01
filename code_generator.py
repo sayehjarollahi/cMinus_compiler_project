@@ -44,16 +44,26 @@ class CodeGenerator:
         self.semantic_stack.append(self.current_num)
 
     def sa_add_array(self):
+        array_len = self.semantic_stack.pop()
+        for i in range(array_len - 1):
+            empty_cell = self.data_block.get_first_empty_cell()
+            self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
+        symbol_row = self.get_symbol_row(self.current_id)
+        symbol_row['cell_No'] = array_len
 
     def sa_add_id(self):
         empty_cell = self.data_block.get_first_empty_cell()
-        for block in self.symbol_table:
-            if block['lexeme'] == self.current_id:
-                block['address'] = empty_cell
-                break
+        symbol_row = self.get_symbol_row(self.current_id)
+        symbol_row['address'] = empty_cell
         self.semantic_stack.append(empty_cell)
         self.semantic_stack.append('#0')
         self.sa_assign()
+
+    def get_symbol_row(self, lexeme):
+        for block in self.symbol_table:
+            if block['lexeme'] == lexeme:
+                return block
+        return None
 
     def handle_action_symbol(self, edge: str, lexeme: str, action_symbol: str):
         if edge == 'ID':
