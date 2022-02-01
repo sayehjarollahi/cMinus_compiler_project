@@ -147,7 +147,7 @@
       [
         "NUM",
         16,
-        ["sa_push_num"]
+        ["sa_push_num_dec"]
       ]
     ]
   },
@@ -518,7 +518,7 @@
       [
         ";",
         54,
-        ["sa_assign","sa_pop"]
+        ["sa_pop"]
       ]
     ]
   },
@@ -814,7 +814,8 @@
     "children": [
       [
         "Expression",
-        87
+        87,
+        ["sa_assign"]
       ]
     ]
   },
@@ -899,7 +900,8 @@
     "children": [
       [
         "Expression",
-        91
+        91,
+        ["sa_assign"]
       ]
     ]
   },

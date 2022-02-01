@@ -37,7 +37,7 @@ class CodeGenerator:
 
     def sa_compute_addr_arr(self):
         t1 = self.get_temp()
-        self.generate_formatted_code('MULT', f'#{self.semantic_stack[-1]}', '#4', t1)
+        self.generate_formatted_code('MULT', self.semantic_stack[-1], '#4', t1)
         self.semantic_stack.pop()
         t2 = self.get_temp()
         self.generate_formatted_code('ADD', t1, f'#{self.semantic_stack[-1]}', t2)
@@ -48,8 +48,11 @@ class CodeGenerator:
         addr = self.find_addr(self.current_id)
         self.semantic_stack.append(addr)
 
-    def sa_push_num(self):
+    def sa_push_num_dec(self):
         self.semantic_stack.append(self.current_num)
+
+    def sa_push_num(self):
+        self.semantic_stack.append(f'#{self.current_num}')
 
     def sa_add_array(self):
         array_len = self.semantic_stack.pop()
