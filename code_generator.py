@@ -121,8 +121,10 @@ class CodeGenerator:
         self.program_block.append(f'({relop}, {(s1)}, {s2}, {s3})')
 
     def add_file(self):
-        o = Path() / 'o.txt'
-        o.write_text('\n'.join(self.program_block))
+        o = Path() / 'output.txt'
+        o.write_text('\n'.join([f'{index}\t{code}' for index, code in enumerate(self.program_block)]))
+
+
 
 
 class Stack(list):
