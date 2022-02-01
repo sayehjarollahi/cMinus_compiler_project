@@ -20,7 +20,7 @@ class CodeGenerator:
     def get_temp(self) -> int:
         return self.temporary_block.get_first_empty_cell()
 
-    def find_addr(self, x: str) -> int:
+    def find_addr(self, x: str) -> Union[str, int]:
         for row in self.symbol_table:
             if row['lexeme'] == x:
                 return row['address']
