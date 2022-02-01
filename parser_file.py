@@ -76,8 +76,20 @@ class Parser:
             return self.handle_error()
         edge, next_state, action_symbol = path
         if action_symbol:
+            if isinstance(edge,NonTerminal):
+                print(edge.name, next_state.id)
+            else:
+                print(edge, next_state.id)
             self.code_generator.handle_action_symbol(
                 self.token_name, self.token_lexeme, action_symbol)
+        #TODO
+
+        else:
+            if isinstance(edge,NonTerminal):
+                print(edge.name, next_state.id)
+            else:
+                print(edge, next_state.id)
+
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
             self.present_state = edge.starting_state
@@ -103,7 +115,7 @@ class Parser:
             self.write_error_in_file(error)
             self.parent_node = self.parent_node_stack.pop(0)
             return self.handle_EOF()
-        for edge, next_state in self.present_state.children:
+        for edge, next_state, action_symbol in self.present_state.children:
             if isinstance(edge, NonTerminal) and self.token_terminal_parameter in edge.follow:
                 error = f'#{self.line_number} : syntax error, missing {edge.name}\n'
                 self.present_state = next_state

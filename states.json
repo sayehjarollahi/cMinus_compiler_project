@@ -518,7 +518,7 @@
       [
         ";",
         54,
-        ["sa_pop"]
+        ["sa_assign","sa_pop"]
       ]
     ]
   },
@@ -770,7 +770,8 @@
       ],
       [
         "ID",
-        80
+        80,
+        ["sa_pid"]
       ]
     ]
   },
@@ -813,8 +814,7 @@
     "children": [
       [
         "Expression",
-        87,
-        ["sa_assign"]
+        87
       ]
     ]
   },
@@ -899,8 +899,7 @@
     "children": [
       [
         "Expression",
-        91,
-        ["sa_assign"]
+        91
       ]
     ]
   },

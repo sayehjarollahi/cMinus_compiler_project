@@ -23,7 +23,7 @@ class CodeGenerator:
 
     def find_addr(self, x: str):
         for row in self.symbol_table:
-            if row['lexeme'] == x:
+            if isinstance(row, dict) and row['lexeme'] == x:
                 return row['address']
 
     def sa_assign(self):
@@ -37,11 +37,10 @@ class CodeGenerator:
 
     def sa_compute_addr_arr(self):
         t1 = self.get_temp()
-        self.generate_formatted_code('MULT', self.semantic_stack[-1], '#4', t1)
+        self.generate_formatted_code('MULT', f'#{self.semantic_stack[-1]}', '#4', t1)
         self.semantic_stack.pop()
         t2 = self.get_temp()
-        self.generate_formatted_code(
-            'ADD', 1, f'#{self.semantic_stack[-1]}', t2)
+        self.generate_formatted_code('ADD', t1, f'#{self.semantic_stack[-1]}', t2)
         self.semantic_stack.pop()
         self.semantic_stack.append(t2)
 
@@ -62,7 +61,7 @@ class CodeGenerator:
 
     def sa_add_id(self):
         symbol_row = self.get_symbol_row(self.current_id)
-        if symbol_row['type']=='int':
+        if symbol_row['type'] == 'int':
             empty_cell = self.data_block.get_first_empty_cell()
             symbol_row['address'] = empty_cell
             self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
@@ -91,7 +90,7 @@ class CodeGenerator:
 
     def sa_add_int_param(self):
         self.symbol_table.append(
-            dict(type='int', scope=len(self.scope_stack)+1))
+            dict(type='int', scope=len(self.scope_stack) + 1))
 
     def sa_dec_type_func(self):
         self.symbol_table[-1]['declaration type'] = 'func'
@@ -106,8 +105,6 @@ class CodeGenerator:
         self.symbol_table[-1]['declaration type'] = 'param'
 
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
-        print(token_name, token_lexeme, action_symbols)
-        print(self.symbol_table)
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
         elif token_name == TokenNames.NUM.value:
@@ -123,8 +120,6 @@ class CodeGenerator:
     def add_file(self):
         o = Path() / 'output.txt'
         o.write_text('\n'.join([f'{index}\t{code}' for index, code in enumerate(self.program_block)]))
-
-
 
 
 class Stack(list):

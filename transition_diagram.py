@@ -79,5 +79,5 @@ class State:
             for state in all_states:
                 temp = State(**state)
                 for child in temp.children:
-                    if len(child)==2:
+                    if len(child) == 2:
                         child.append(False)
