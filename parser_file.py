@@ -25,6 +25,7 @@ class Parser:
         self.syntax_errors_file_path = syntax_errors_file_path
         self.symbol_table = set(KEYWORDS)
 
+
     def initialize_diagrams(self):
         State.create_all_states()
         NonTerminal.create_all_non_terminals()
@@ -42,7 +43,9 @@ class Parser:
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
             TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
         if self.token_name is TokenNames.ID.name:
+            #TODO
             self.symbol_table.add(self.token_lexeme)
+
 
     def find_path(self) -> Union[List[Union[NonTerminal, State]], bool]:
         for edge, next_state in self.present_state.children:
