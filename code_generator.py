@@ -1,17 +1,18 @@
 from ctypes import Union
 from typing import Dict, List
 from statics import TokenNames
+from pathlib import Path
 
 
 class CodeGenerator:
-    def __init__(self, symbol_table: List[Dict[str, Union[str, int]]]):
+    def __init__(self):
         self.AR = []
         self.semantic_stack = []
         self.program_block = Stack(0)
         self.data_block = Stack(100)
         self.temporary_block = Stack(500)
         self.main_starting_addr = 50
-        self.symbol_table = symbol_table
+        self.symbol_table = None
         self.current_id = None
         self.current_num = None
         self.current_keyword = None
@@ -20,7 +21,7 @@ class CodeGenerator:
     def get_temp(self) -> int:
         return self.temporary_block.get_first_empty_cell()
 
-    def find_addr(self, x: str) -> Union[str, int]:
+    def find_addr(self, x: str):
         for row in self.symbol_table:
             if row['lexeme'] == x:
                 return row['address']
@@ -114,6 +115,10 @@ class CodeGenerator:
 
     def generate_formatted_code(self, relop: str, s1, s2, s3):
         self.program_block.append(f'({relop}, {(s1)}, {s2}, {s3})')
+
+    def add_file(self):
+        o = Path() / 'o.txt'
+        o.write_text('\n'.join(self.program_block))
 
 
 class Stack(list):

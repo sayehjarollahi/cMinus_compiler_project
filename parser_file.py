@@ -26,6 +26,7 @@ class Parser:
         self.syntax_errors_file_path = syntax_errors_file_path
         self.symbol_table = list(KEYWORDS)
         self.code_generator = code_generator
+        self.code_generator.symbol_table = self.symbol_table
 
     def initialize_diagrams(self):
         State.create_all_states()
