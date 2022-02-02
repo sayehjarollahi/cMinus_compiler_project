@@ -1,5 +1,4 @@
-from ctypes import Union
-from typing import Dict, List
+from typing import Dict, List, Union
 from statics import TokenNames
 from pathlib import Path
 
@@ -8,7 +7,7 @@ class CodeGenerator:
     def __init__(self):
         self.AR = []
         self.semantic_stack = []
-        self.program_block = Stack(0)
+        self.program_block = []
         self.data_block = Stack(100)
         self.temporary_block = Stack(500)
         self.main_starting_addr = 50
@@ -21,13 +20,11 @@ class CodeGenerator:
     def get_temp(self) -> int:
         return self.temporary_block.get_first_empty_cell()
 
-    def find_addr(self, x: str):
-        for row in self.symbol_table:
-            if isinstance(row, dict) and row['lexeme'] == x:
-                return row['address']
+    def find_addr(self, lexeme: str):
+        row = self.get_symbol_row(lexeme)
+        return row['address']
 
     def sa_assign(self):
-        self.add_file()
         self.generate_formatted_code(
             'ASSIGN', self.semantic_stack[-1], self.semantic_stack[-2], '')
         self.semantic_stack.pop()
@@ -40,7 +37,7 @@ class CodeGenerator:
         self.generate_formatted_code('MULT', self.semantic_stack[-1], '#4', t1)
         self.semantic_stack.pop()
         t2 = self.get_temp()
-        self.generate_formatted_code('ADD', t1, f'#{self.semantic_stack[-1]}', t2)
+        self.generate_formatted_code('ADD', t1, self.semantic_stack[-1], t2)
         self.semantic_stack.pop()
         self.semantic_stack.append(t2)
 
@@ -82,14 +79,14 @@ class CodeGenerator:
         del self.symbol_table[last_scope:]
 
     def get_symbol_row(self, lexeme):
-        for block in self.symbol_table:
-            if isinstance(block, dict) and block['lexeme'] == lexeme:
-                return block
+        for row in reversed(self.symbol_table):
+            if isinstance(row, dict) and row['lexeme'] == lexeme:
+                return row
         return None
 
     def sa_add_type(self):
-        self.symbol_table.append(
-            dict(type=self.current_keyword, scope=len(self.scope_stack)))
+        self.symbol_table[-1]['type'] = self.current_keyword
+        self.symbol_table[-1]['scope'] = len(self.scope_stack)
 
     def sa_add_int_param(self):
         self.symbol_table.append(
@@ -107,6 +104,28 @@ class CodeGenerator:
     def sa_dec_type_param(self):
         self.symbol_table[-1]['declaration type'] = 'param'
 
+    def sa_save(self):
+        self.semantic_stack.append(len(self.program_block))
+        self.program_block.append('')
+
+    def sa_jpf(self):
+        self.insert_formatted_code(
+            self.semantic_stack[-1], 'JPF', self.semantic_stack[-2], len(self.program_block), '')
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+
+    def sa_jpf_save(self):
+        self.insert_formatted_code(
+            self.semantic_stack[-1], 'JPF', self.semantic_stack[-2], len(self.program_block)+1, '')
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+        self.sa_save()
+
+    def sa_jp(self):
+        self.insert_formatted_code(
+            self.semantic_stack[-1], 'JP', len(self.program_block), '', '')
+        self.semantic_stack.pop()
+
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
@@ -114,24 +133,26 @@ class CodeGenerator:
             self.current_num = token_lexeme
         elif token_name == TokenNames.KEYWORD.value:
             self.current_keyword = token_lexeme
+        # print(action_symbols)
         for action_symbol in action_symbols:
             getattr(self, action_symbol)()
 
     def generate_formatted_code(self, relop: str, s1, s2, s3):
-        self.program_block.append(f'({relop}, {(s1)}, {s2}, {s3})')
+        self.program_block.append(f'({relop}, {s1}, {s2}, {s3})')
 
-    def add_file(self):
-        o = Path() / 'output.txt'
-        o.write_text('\n'.join([f'{index}\t{code}' for index, code in enumerate(self.program_block)]))
+    def insert_formatted_code(self, idx: int, relop: str, s1, s2, s3):
+        self.program_block[idx] = f'({relop}, {s1}, {s2}, {s3})'
+
+    def add_file(self, x):
+        o = Path() / f'{x}.txt'
+        o.write_text('\n'.join(
+            [f'{index}\t{code}' for index, code in enumerate(self.program_block)]))
 
 
 class Stack(list):
     def __init__(self, starting_index: int):
         self.starting_index = starting_index
         self.filled_cells = 0
-
-    def insert(self, __index, __object) -> None:
-        return super().insert(int((__index - self.starting_index) / 4), __object)
 
     def get_first_empty_cell(self) -> int:
         empty_cell = self.starting_index + 4 * self.filled_cells

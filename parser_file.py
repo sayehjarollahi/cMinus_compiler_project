@@ -27,6 +27,7 @@ class Parser:
         self.symbol_table = list(KEYWORDS)
         self.code_generator = code_generator
         self.code_generator.symbol_table = self.symbol_table
+        self.action_symbol_stack = []
 
     def initialize_diagrams(self):
         State.create_all_states()
@@ -44,8 +45,11 @@ class Parser:
         self.token_name, self.token_lexeme, self.line_number = self.scanner.get_next_token()
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
             TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
-        if self.token_name is TokenNames.ID.name and 'lexeme' not in self.symbol_table[-1]:
-            self.symbol_table[-1]['lexeme'] = self.token_lexeme
+        if self.token_name is TokenNames.ID.name:
+            for row in self.symbol_table:
+                if isinstance(row, dict) and row['lexeme'] == self.token_lexeme:
+                    return
+            self.symbol_table.append(dict(lexeme=self.token_lexeme))
 
     def find_path(self) -> Union[Tuple[Any, Any, Any], bool]:
         for edge, next_state, action_symbol in self.present_state.children:
@@ -70,25 +74,14 @@ class Parser:
                 self.present_state = self.next_state_stack.pop()
                 self.diagram = self.diagram_stack.pop()
                 self.parent_node = self.parent_node_stack.pop()
+                if len(self.action_symbol_stack) > 0:
+                    self.code_generator.handle_action_symbol(
+                        *self.action_symbol_stack.pop())
                 return
         path = self.find_path()
         if not path:
             return self.handle_error()
         edge, next_state, action_symbol = path
-        if action_symbol:
-            if isinstance(edge,NonTerminal):
-                print(edge.name, next_state.id)
-            else:
-                print(edge, next_state.id)
-            self.code_generator.handle_action_symbol(
-                self.token_name, self.token_lexeme, action_symbol)
-        #TODO
-
-        else:
-            if isinstance(edge,NonTerminal):
-                print(edge.name, next_state.id)
-            else:
-                print(edge, next_state.id)
 
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
@@ -97,7 +90,13 @@ class Parser:
             self.diagram = edge
             self.parent_node_stack.append(self.parent_node)
             self.parent_node = Node(self.diagram.name, parent=self.parent_node)
+            if action_symbol:
+                self.action_symbol_stack.append(
+                    [self.token_name, self.token_lexeme, action_symbol])
         else:
+            if action_symbol:
+                self.code_generator.handle_action_symbol(
+                    self.token_name, self.token_lexeme, action_symbol)
             if edge == EPSILON:
                 Node(EPSILON, parent=self.parent_node)
             else:
