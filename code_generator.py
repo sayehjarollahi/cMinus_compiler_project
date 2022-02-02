@@ -71,8 +71,7 @@ class CodeGenerator:
     def sa_add_id_param(self):
         self.symbol_table[-1]['lexeme'] = self.current_id
         empty_cell = self.data_block.get_first_empty_cell()
-        symbol_row = self.get_symbol_row(self.current_id)
-        symbol_row['address'] = empty_cell
+        self.symbol_table[-1]['address'] = empty_cell
 
     def sa_start_scope(self):
         self.scope_stack.append(len(self.symbol_table))
@@ -118,7 +117,7 @@ class CodeGenerator:
         self.semantic_stack.pop()
 
     def sa_jpf_save(self):
-        print(self.semantic_stack[-1])
+        print(self.semantic_stack)
         self.insert_formatted_code(
             self.semantic_stack[-1], 'JPF', self.semantic_stack[-2], len(self.program_block)+1, '')
         self.semantic_stack.pop()
@@ -145,7 +144,6 @@ class CodeGenerator:
         self.program_block.append(f'({relop}, {s1}, {s2}, {s3})')
 
     def insert_formatted_code(self, idx: int, relop: str, s1, s2, s3):
-        self.add_file('1.txt')
         self.program_block[idx] = f'({relop}, {s1}, {s2}, {s3})'
 
     def add_file(self, x):

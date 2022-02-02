@@ -73,6 +73,8 @@ class Parser:
                     if self.action_symbol_stack[-1][2]:
                         self.code_generator.handle_action_symbol(
                             *self.action_symbol_stack.pop())
+                    else:
+                        self.action_symbol_stack.pop()
                 return
         path = self.find_path()
         if not path:
