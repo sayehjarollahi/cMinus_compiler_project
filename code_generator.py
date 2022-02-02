@@ -149,7 +149,7 @@ class CodeGenerator:
 
     def sa_temp(self):
         self.insert_formatted_code(
-            self.semantic_stack[-1], 'ASSIGN', len(self.program_block), self.repeat_stack[-1], '')
+            self.semantic_stack[-1], 'ASSIGN', f'#{len(self.program_block)}', self.repeat_stack[-1], '')
         self.semantic_stack.pop()
         self.repeat_stack.pop()
 
