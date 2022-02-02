@@ -1,3 +1,4 @@
+from turtle import pu
 from typing import Dict, List, Union
 from statics import TokenNames
 from pathlib import Path
@@ -30,6 +31,7 @@ class CodeGenerator:
         self.semantic_stack.pop()
 
     def sa_pop(self):
+        print(self.semantic_stack)
         self.semantic_stack.pop()
 
     def sa_compute_addr_arr(self):
@@ -117,6 +119,7 @@ class CodeGenerator:
         self.semantic_stack.pop()
 
     def sa_jpf_save(self):
+        self.add_file('1')
         print(self.semantic_stack)
         self.insert_formatted_code(
             self.semantic_stack[-1], 'JPF', self.semantic_stack[-2], len(self.program_block)+1, '')
@@ -129,6 +132,15 @@ class CodeGenerator:
             self.semantic_stack[-1], 'JP', len(self.program_block), '', '')
         self.semantic_stack.pop()
 
+    def sa_label(self):
+        self.semantic_stack.append(len(self.program_block))
+
+    def sa_until(self):
+        self.generate_formatted_code(
+            'JPF', self.semantic_stack[-1], self.semantic_stack[-2], '')
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
@@ -136,7 +148,7 @@ class CodeGenerator:
             self.current_num = token_lexeme
         elif token_name == TokenNames.KEYWORD.value:
             self.current_keyword = token_lexeme
-        # print(action_symbols)
+        print(action_symbols)
         for action_symbol in action_symbols:
             getattr(self, action_symbol)()
 
