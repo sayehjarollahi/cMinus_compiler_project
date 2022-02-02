@@ -179,7 +179,7 @@ class CodeGenerator:
         temp = self.get_temp()
         if symbol == '<':
             sign = 'LT'
-        self.generate_formatted_code(sign, self.semantic_stack[-1], self.semantic_stack[-2], temp)
+        self.generate_formatted_code(sign, self.semantic_stack[-2], self.semantic_stack[-1], temp)
         self.semantic_stack.pop()
         self.semantic_stack.pop()
         self.semantic_stack.append(temp)
