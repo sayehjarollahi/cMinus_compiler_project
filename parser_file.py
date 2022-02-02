@@ -80,7 +80,12 @@ class Parser:
         if not path:
             return self.handle_error()
         edge, next_state, action_symbol = path
-
+        '''
+        if isinstance(edge, NonTerminal):
+            print(edge.name, next_state.id)
+        else:
+            print(edge, next_state.id)
+        '''
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
             self.present_state = edge.starting_state

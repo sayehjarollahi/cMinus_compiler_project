@@ -15,6 +15,8 @@ class CodeGenerator:
         self.current_id = None
         self.current_num = None
         self.current_keyword = None
+        self.current_symbol = None
+        self.symbol_stack = []
         self.scope_stack = [0]
 
     def get_temp(self) -> int:
@@ -117,9 +119,8 @@ class CodeGenerator:
         self.semantic_stack.pop()
 
     def sa_jpf_save(self):
-        print(self.semantic_stack)
         self.insert_formatted_code(
-            self.semantic_stack[-1], 'JPF', self.semantic_stack[-2], len(self.program_block)+1, '')
+            self.semantic_stack[-1], 'JPF', self.semantic_stack[-2], len(self.program_block) + 1, '')
         self.semantic_stack.pop()
         self.semantic_stack.pop()
         self.sa_save()
@@ -129,6 +130,22 @@ class CodeGenerator:
             self.semantic_stack[-1], 'JP', len(self.program_block), '', '')
         self.semantic_stack.pop()
 
+    def sa_calc_arithmetic(self):
+        sign = 'SUB'
+        symbol = self.symbol_stack.pop()
+        if symbol == '+':
+            sign = 'ADD'
+        elif symbol == '*':
+            sign = 'MULT'
+        temp = self.get_temp()
+        self.generate_formatted_code(sign, self.semantic_stack[-1], self.semantic_stack[-2], temp)
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+        self.semantic_stack.append(temp)
+
+    def sa_def_arithmetic(self):
+        self.symbol_stack.append(self.current_symbol)
+
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
@@ -136,7 +153,8 @@ class CodeGenerator:
             self.current_num = token_lexeme
         elif token_name == TokenNames.KEYWORD.value:
             self.current_keyword = token_lexeme
-        # print(action_symbols)
+        elif token_name == TokenNames.SYMBOL.name:
+            self.current_symbol = token_lexeme
         for action_symbol in action_symbols:
             getattr(self, action_symbol)()
 
