@@ -34,7 +34,6 @@ class CodeGenerator:
         self.semantic_stack.pop()
 
     def sa_pop(self):
-        print(self.semantic_stack)
         self.semantic_stack.pop()
 
     def sa_compute_addr_arr(self):
@@ -174,7 +173,21 @@ class CodeGenerator:
     def sa_def_arithmetic(self):
         self.symbol_stack.append(self.current_symbol)
 
+    def sa_add_condition(self):
+        symbol = self.symbol_stack.pop()
+        sign = 'EQ'
+        temp = self.get_temp()
+        if symbol == '<':
+            sign = 'LT'
+        self.generate_formatted_code(sign, self.semantic_stack[-1], self.semantic_stack[-2], temp)
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+        self.semantic_stack.append(temp)
+
+
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
+        print(token_name, token_lexeme, action_symbols)
+        print(self.semantic_stack)
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
         elif token_name == TokenNames.NUM.value:
@@ -183,7 +196,6 @@ class CodeGenerator:
             self.current_keyword = token_lexeme
         elif token_name == TokenNames.SYMBOL.name:
             self.current_symbol = token_lexeme
-        print(action_symbols)
         for action_symbol in action_symbols:
             getattr(self, action_symbol)()
 

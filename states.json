@@ -1031,7 +1031,8 @@
     "children": [
       [
         "Additive-expression",
-        101
+        101,
+        ["sa_add_condition"]
       ]
     ]
   },
@@ -1046,11 +1047,13 @@
     "children": [
       [
         "<",
-        103
+        103,
+        ["sa_def_arithmetic"]
       ],
       [
         "==",
-        103
+        103,
+        ["sa_def_arithmetic"]
       ]
     ]
   },
