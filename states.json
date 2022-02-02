@@ -526,7 +526,10 @@
       ],
       [
         "break",
-        53
+        53,
+        [
+          "sa_break"
+        ]
       ],
       [
         ";",
@@ -686,6 +689,7 @@
         "repeat",
         67,
         [
+          "sa_temp_save",
           "sa_label"
         ]
       ]
@@ -739,7 +743,8 @@
         ")",
         72,
         [
-          "sa_until"
+          "sa_until",
+          "sa_temp"
         ]
       ]
     ]
@@ -1136,7 +1141,9 @@
       [
         "Addop",
         114,
-        ["sa_def_arithmetic"]
+        [
+          "sa_def_arithmetic"
+        ]
       ],
       [
         "epsilon",
@@ -1151,7 +1158,9 @@
       [
         "Term",
         115,
-        ["sa_calc_arithmetic"]
+        [
+          "sa_calc_arithmetic"
+        ]
       ]
     ]
   },
@@ -1271,7 +1280,9 @@
       [
         "*",
         129,
-        ["sa_def_arithmetic"]
+        [
+          "sa_def_arithmetic"
+        ]
       ],
       [
         "epsilon",
@@ -1286,7 +1297,9 @@
       [
         "Factor",
         130,
-        ["sa_calc_arithmetic"]
+        [
+          "sa_calc_arithmetic"
+        ]
       ]
     ]
   },
@@ -1316,7 +1329,9 @@
       [
         "ID",
         136,
-        ["sa_pid"]
+        [
+          "sa_pid"
+        ]
       ],
       [
         "NUM",

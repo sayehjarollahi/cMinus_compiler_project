@@ -19,6 +19,7 @@ class CodeGenerator:
         self.current_symbol = None
         self.symbol_stack = []
         self.scope_stack = [0]
+        self.repeat_stack = []
 
     def get_temp(self) -> int:
         return self.temporary_block.get_first_empty_cell()
@@ -140,6 +141,21 @@ class CodeGenerator:
             'JPF', self.semantic_stack[-1], self.semantic_stack[-2], '')
         self.semantic_stack.pop()
         self.semantic_stack.pop()
+
+    def sa_temp_save(self):
+        self.sa_save()
+        t = self.get_temp()
+        self.repeat_stack.append(t)
+
+    def sa_temp(self):
+        self.insert_formatted_code(
+            self.semantic_stack[-1], 'ASSIGN', len(self.program_block), self.repeat_stack[-1], '')
+        self.semantic_stack.pop()
+        self.repeat_stack.pop()
+
+    def sa_break(self):
+        self.generate_formatted_code(
+            'JP', f'@{self.repeat_stack[-1]}', '', '')
 
     def sa_calc_arithmetic(self):
         sign = 'SUB'
