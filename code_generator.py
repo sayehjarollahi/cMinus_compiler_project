@@ -1,4 +1,5 @@
-from turtle import pu
+import re
+from tkinter.messagebox import NO
 from typing import Dict, List, Union
 from statics import TokenNames
 from pathlib import Path
@@ -6,7 +7,8 @@ from pathlib import Path
 
 class CodeGenerator:
     def __init__(self):
-        self.AR = []
+        self.ar_stack = []
+        self.ar_temp_stack = []
         self.semantic_stack = []
         self.program_block = []
         self.data_block = Stack(100)
@@ -210,6 +212,22 @@ class CodeGenerator:
         o.write_text('\n'.join(
             [f'{index}\t{code}' for index, code in enumerate(self.program_block)]))
 
+    def sa_create_ar(self):
+        ar = Record(lexeme=self.current_id, control_link=self.ar_stack[-1])
+        current_row = self.get_symbol_row(ar.lexeme)
+        for record in reversed(self.ar_stack):
+            row = self.get_symbol_row(record.lexeme)
+            if row['scope'] < current_row['scope']:
+                ar.access_link = record
+                break
+        self.ar_temp_stack.append(ar)
+
+    def sa_init_machine_status(self):
+        pass
+
+    def sa_assign_param(self):
+        self.semantic_stack[-1]
+
 
 class Stack(list):
     def __init__(self, starting_index: int):
@@ -223,6 +241,11 @@ class Stack(list):
 
 
 class Record:
-    def __init__(self) -> None:
-        self.returned_value = None
-        self.actual_parameters = {}
+    def __init__(self, lexeme: str, control_link, access_link) -> None:
+        self.lexeme = lexeme
+        self.actual_parameters = []
+        self.control_link = control_link
+        self.access_link = access_link
+        self.machine_status = None
+        self.local_data = None
+        self.temporaries = None
