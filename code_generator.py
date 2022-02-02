@@ -37,7 +37,8 @@ class CodeGenerator:
         self.generate_formatted_code('MULT', self.semantic_stack[-1], '#4', t1)
         self.semantic_stack.pop()
         t2 = self.get_temp()
-        self.generate_formatted_code('ADD', t1, self.semantic_stack[-1], t2)
+        self.generate_formatted_code(
+            'ADD', t1, f'#{self.semantic_stack[-1]}', t2)
         self.semantic_stack.pop()
         self.semantic_stack.append(t2)
 
@@ -60,6 +61,7 @@ class CodeGenerator:
         symbol_row['cell_No'] = array_len
 
     def sa_add_id(self):
+        self.symbol_table[-1]['lexeme'] = self.current_id
         symbol_row = self.get_symbol_row(self.current_id)
         if symbol_row['type'] == 'int':
             empty_cell = self.data_block.get_first_empty_cell()
@@ -67,6 +69,7 @@ class CodeGenerator:
             self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
 
     def sa_add_id_param(self):
+        self.symbol_table[-1]['lexeme'] = self.current_id
         empty_cell = self.data_block.get_first_empty_cell()
         symbol_row = self.get_symbol_row(self.current_id)
         symbol_row['address'] = empty_cell
@@ -80,13 +83,13 @@ class CodeGenerator:
 
     def get_symbol_row(self, lexeme):
         for row in reversed(self.symbol_table):
-            if isinstance(row, dict) and row['lexeme'] == lexeme:
+            if row['lexeme'] == lexeme:
                 return row
         return None
 
     def sa_add_type(self):
-        self.symbol_table[-1]['type'] = self.current_keyword
-        self.symbol_table[-1]['scope'] = len(self.scope_stack)
+        self.symbol_table.append(
+            dict(type=self.current_keyword, scope=len(self.scope_stack)))
 
     def sa_add_int_param(self):
         self.symbol_table.append(
@@ -115,6 +118,7 @@ class CodeGenerator:
         self.semantic_stack.pop()
 
     def sa_jpf_save(self):
+        print(self.semantic_stack[-1])
         self.insert_formatted_code(
             self.semantic_stack[-1], 'JPF', self.semantic_stack[-2], len(self.program_block)+1, '')
         self.semantic_stack.pop()
@@ -141,6 +145,7 @@ class CodeGenerator:
         self.program_block.append(f'({relop}, {s1}, {s2}, {s3})')
 
     def insert_formatted_code(self, idx: int, relop: str, s1, s2, s3):
+        self.add_file('1.txt')
         self.program_block[idx] = f'({relop}, {s1}, {s2}, {s3})'
 
     def add_file(self, x):

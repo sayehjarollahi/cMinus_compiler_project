@@ -45,13 +45,6 @@ class Parser:
         self.token_name, self.token_lexeme, self.line_number = self.scanner.get_next_token()
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
             TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
-        if self.token_name is TokenNames.ID.name:
-            for row in reversed(self.symbol_table):
-                if row['scope'] != len(self.code_generator.scope_stack):
-                    break
-                if row['lexeme'] == self.token_lexeme:
-                    return
-            self.symbol_table.append(dict(lexeme=self.token_lexeme))
 
     def find_path(self) -> Union[Tuple[Any, Any, Any], bool]:
         for edge, next_state, action_symbol in self.present_state.children:
