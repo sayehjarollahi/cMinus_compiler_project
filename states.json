@@ -115,10 +115,7 @@
     "children": [
       [
         "Fun-declaration-prime",
-        13,
-        [
-          "sa_dec_type_func"
-        ]
+        13
       ],
       [
         "Var-declaration-prime",
@@ -198,7 +195,10 @@
     "children": [
       [
         "(",
-        20
+        20,
+        [
+          "sa_dec_type_func"
+        ]
       ]
     ]
   },
