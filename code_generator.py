@@ -179,11 +179,11 @@ class CodeGenerator:
         temp = self.get_temp()
         if symbol == '<':
             sign = 'LT'
-        self.generate_formatted_code(sign, self.semantic_stack[-1], self.semantic_stack[-2], temp)
+        self.generate_formatted_code(
+            sign, self.semantic_stack[-1], self.semantic_stack[-2], temp)
         self.semantic_stack.pop()
         self.semantic_stack.pop()
         self.semantic_stack.append(temp)
-
 
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
         print(token_name, token_lexeme, action_symbols)
