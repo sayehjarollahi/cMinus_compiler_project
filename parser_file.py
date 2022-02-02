@@ -24,7 +24,7 @@ class Parser:
         self.parent_node = Node(self.diagram.name)
         self.parent_node_stack = []
         self.syntax_errors_file_path = syntax_errors_file_path
-        self.symbol_table = list(KEYWORDS)
+        self.symbol_table = []
         self.code_generator = code_generator
         self.code_generator.symbol_table = self.symbol_table
         self.action_symbol_stack = []
@@ -46,8 +46,10 @@ class Parser:
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
             TokenNames.SYMBOL.value, TokenNames.KEYWORD.value, TokenNames.EOF.value} else self.token_name
         if self.token_name is TokenNames.ID.name:
-            for row in self.symbol_table:
-                if isinstance(row, dict) and row['lexeme'] == self.token_lexeme:
+            for row in reversed(self.symbol_table):
+                if row['scope'] != len(self.code_generator.scope_stack):
+                    break
+                if row['lexeme'] == self.token_lexeme:
                     return
             self.symbol_table.append(dict(lexeme=self.token_lexeme))
 
@@ -75,8 +77,9 @@ class Parser:
                 self.diagram = self.diagram_stack.pop()
                 self.parent_node = self.parent_node_stack.pop()
                 if len(self.action_symbol_stack) > 0:
-                    self.code_generator.handle_action_symbol(
-                        *self.action_symbol_stack.pop())
+                    if self.action_symbol_stack[-1][2]:
+                        self.code_generator.handle_action_symbol(
+                            *self.action_symbol_stack.pop())
                 return
         path = self.find_path()
         if not path:
@@ -90,9 +93,8 @@ class Parser:
             self.diagram = edge
             self.parent_node_stack.append(self.parent_node)
             self.parent_node = Node(self.diagram.name, parent=self.parent_node)
-            if action_symbol:
-                self.action_symbol_stack.append(
-                    [self.token_name, self.token_lexeme, action_symbol])
+            self.action_symbol_stack.append(
+                [self.token_name, self.token_lexeme, action_symbol])
         else:
             if action_symbol:
                 self.code_generator.handle_action_symbol(
