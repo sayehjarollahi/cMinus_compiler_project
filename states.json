@@ -1135,7 +1135,8 @@
     "children": [
       [
         "Addop",
-        114
+        114,
+        ["sa_def_arithmetic"]
       ],
       [
         "epsilon",
@@ -1149,7 +1150,8 @@
     "children": [
       [
         "Term",
-        115
+        115,
+        ["sa_calc_arithmetic"]
       ]
     ]
   },
@@ -1268,7 +1270,8 @@
     "children": [
       [
         "*",
-        129
+        129,
+        ["sa_def_arithmetic"]
       ],
       [
         "epsilon",
@@ -1282,7 +1285,8 @@
     "children": [
       [
         "Factor",
-        130
+        130,
+        ["sa_calc_arithmetic"]
       ]
     ]
   },
@@ -1311,7 +1315,8 @@
       ],
       [
         "ID",
-        136
+        136,
+        ["sa_pid"]
       ],
       [
         "NUM",
