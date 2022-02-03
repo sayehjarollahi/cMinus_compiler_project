@@ -25,12 +25,11 @@ class CodeGenerator:
         self.current_func = None
         self.main_return_stack = []
 
-
     def define_output_func(self):
         self.symbol_table.append(dict(
             lexeme='output',
             address=0,
-            scope= float('inf')
+            scope=float('inf')
         ))
 
     def get_temp(self) -> int:
@@ -265,9 +264,12 @@ class CodeGenerator:
         for param, actual_param in zip(row['params_addr'], record.actual_parameters):
             self.generate_formatted_code('ASSIGN', actual_param, param, '')
         self.generate_formatted_code(
-            'ASSIGN', f'#{len(self.program_block) + 2}', self.semantic_stack.pop(), '')
+            'ASSIGN', f'#{len(self.program_block) + 2}', self.semantic_stack.pop(), '')  # self.semantic_stack[-1] = func['address']
         self.generate_formatted_code('JP', row['start_addr'], '', '')
-        self.semantic_stack.append(row['return'])
+        # self.semantic_stack.append(row['return'])
+        t = self.get_temp()
+        self.generate_formatted_code('ASSIGN', row['return'], t, '')
+        self.semantic_stack.append(t)
 
     def handle_output(self, record):
         addr = record.actual_parameters[0]
@@ -289,7 +291,7 @@ class CodeGenerator:
         if self.current_func != 'main':
             addr = row['address']
             self.generate_formatted_code(
-                'JP', f'@{addr}', '', '')  # semantic_stack[-1] = row['address]
+                'JP', f'@{addr}', '', '')
         else:
             self.main_return_stack.append(len(self.program_block))
             self.program_block.append('')
