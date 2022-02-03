@@ -25,6 +25,14 @@ class CodeGenerator:
         self.current_func = None
         self.main_return_stack = []
 
+
+    def define_output_func(self):
+        self.symbol_table.append(dict(
+            lexeme='output',
+            address=0,
+            scope= float('inf')
+        ))
+
     def get_temp(self) -> int:
         return self.temporary_block.get_first_empty_cell()
 
@@ -80,7 +88,7 @@ class CodeGenerator:
 
     def sa_add_type_param(self):
         self.symbol_table[-1]['type'] = self.current_keyword
-        self.symbol_table[-1]['scope'] = len(self.scope_stack)+1
+        self.symbol_table[-1]['scope'] = len(self.scope_stack) + 1
         addr = self.symbol_table[-1]['address']
         row = self.get_symbol_row(self.current_func)
         row['params_addr'].append(addr)
@@ -191,7 +199,7 @@ class CodeGenerator:
             sign = 'MULT'
         temp = self.get_temp()
         self.generate_formatted_code(
-            sign, self.semantic_stack[-1], self.semantic_stack[-2], temp)
+            sign, self.semantic_stack[-2], self.semantic_stack[-1], temp)
         self.semantic_stack.pop()
         self.semantic_stack.pop()
         self.semantic_stack.append(temp)
@@ -249,14 +257,21 @@ class CodeGenerator:
 
     def sa_call_func(self):
         record = self.ar_temp_stack.pop()
+        if record.lexeme == 'output':
+            self.handle_output(record)
+            return
         self.ar_stack.append(record)
         row = self.get_symbol_row(record.lexeme)
         for param, actual_param in zip(row['params_addr'], record.actual_parameters):
             self.generate_formatted_code('ASSIGN', actual_param, param, '')
         self.generate_formatted_code(
-            'ASSIGN', f'#{len(self.program_block)+2}', self.semantic_stack.pop(), '')
+            'ASSIGN', f'#{len(self.program_block) + 2}', self.semantic_stack.pop(), '')
         self.generate_formatted_code('JP', row['start_addr'], '', '')
         self.semantic_stack.append(row['return'])
+
+    def handle_output(self, record):
+        addr = record.actual_parameters[0]
+        self.generate_formatted_code('PRINT', addr, '', '')
 
     def sa_assign_param(self):
         param = self.semantic_stack.pop()

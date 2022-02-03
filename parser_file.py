@@ -8,6 +8,7 @@ from typing import List, Union, Tuple, Any
 from anytree import Node, RenderTree
 from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
 
+
 # handle line number for EOF in normal state and unclosed comment error
 
 
@@ -27,6 +28,7 @@ class Parser:
         self.symbol_table = []
         self.code_generator = code_generator
         self.code_generator.symbol_table = self.symbol_table
+        self.code_generator.define_output_func()
         self.action_symbol_stack = []
 
     def initialize_diagrams(self):
@@ -55,10 +57,10 @@ class Parser:
     def is_valid_edge(self, edge: Union[NonTerminal, str]) -> bool:
         if isinstance(edge, NonTerminal):
             return (self.token_terminal_parameter in edge.first) or (
-                EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
+                    EPSILON in edge.first and self.token_terminal_parameter in edge.follow)
         else:
             return self.token_terminal_parameter == edge or (
-                edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
+                    edge == EPSILON and self.token_terminal_parameter in self.diagram.follow)
 
     def go_next_state(self):
         # when present state is final state
@@ -80,12 +82,11 @@ class Parser:
         if not path:
             return self.handle_error()
         edge, next_state, action_symbol = path
-        '''
+
         if isinstance(edge, NonTerminal):
             print(edge.name, next_state.id)
         else:
             print(edge, next_state.id)
-        '''
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
             self.present_state = edge.starting_state
