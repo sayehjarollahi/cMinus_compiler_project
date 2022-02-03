@@ -266,10 +266,12 @@ class CodeGenerator:
         self.generate_formatted_code(
             'ASSIGN', f'#{len(self.program_block) + 2}', self.semantic_stack.pop(), '')  # self.semantic_stack[-1] = func['address']
         self.generate_formatted_code('JP', row['start_addr'], '', '')
-        # self.semantic_stack.append(row['return'])
-        t = self.get_temp()
-        self.generate_formatted_code('ASSIGN', row['return'], t, '')
-        self.semantic_stack.append(t)
+        if row['type'] == 'int':
+            t = self.get_temp()
+            self.generate_formatted_code('ASSIGN', row['return'], t, '')
+            self.semantic_stack.append(t)
+        else:
+            self.semantic_stack.append(row['return'])
 
     def handle_output(self, record):
         addr = record.actual_parameters[0]
