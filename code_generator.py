@@ -23,6 +23,7 @@ class CodeGenerator:
         self.scope_stack = [0]
         self.repeat_stack = []
         self.current_func = None
+        self.main_return_stack = []
 
     def get_temp(self) -> int:
         return self.temporary_block.get_first_empty_cell()
@@ -47,7 +48,7 @@ class CodeGenerator:
         self.generate_formatted_code(
             'ADD', t1, self.semantic_stack[-1], t2)
         self.semantic_stack.pop()
-        self.semantic_stack.append(t2)
+        self.semantic_stack.append(f'@{t2}')
 
     def sa_pid(self):
         addr = self.find_addr(self.current_id)
@@ -61,7 +62,7 @@ class CodeGenerator:
 
     def sa_add_array(self):
         array_len = self.semantic_stack.pop()
-        for i in range(int(array_len) - 1):
+        for _ in range(int(array_len) - 1):
             empty_cell = self.data_block.get_first_empty_cell()
             self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
         symbol_row = self.get_symbol_row(self.current_id)
@@ -71,12 +72,27 @@ class CodeGenerator:
         symbol_row['address'] = empty_cell
         symbol_row['cell_No'] = array_len
 
+    def sa_add_type(self):
+        self.symbol_table[-1]['type'] = self.current_keyword
+        self.symbol_table[-1]['scope'] = len(self.scope_stack)
+        addr = self.symbol_table[-1]['address']
+        self.generate_formatted_code('ASSIGN', '#0', addr, '')
+
+    def sa_add_type_param(self):
+        self.symbol_table[-1]['type'] = self.current_keyword
+        self.symbol_table[-1]['scope'] = len(self.scope_stack)+1
+        addr = self.symbol_table[-1]['address']
+        row = self.get_symbol_row(self.current_func)
+        row['params_addr'].append(addr)
+
     def sa_add_id(self):
-        self.symbol_table[-1]['lexeme'] = self.current_id
-        symbol_row = self.get_symbol_row(self.current_id)
         empty_cell = self.data_block.get_first_empty_cell()
-        symbol_row['address'] = empty_cell
-        self.generate_formatted_code('ASSIGN', '#0', empty_cell, '')
+        self.symbol_table.append(
+            dict(lexeme=self.current_id, address=empty_cell))
+
+    def sa_add_int_param(self):
+        self.symbol_table.append(
+            dict(type='int', scope=len(self.scope_stack) + 1))
 
     def sa_add_id_param(self):
         self.symbol_table[-1]['lexeme'] = self.current_id
@@ -84,6 +100,9 @@ class CodeGenerator:
         self.symbol_table[-1]['address'] = empty_cell
         row = self.get_symbol_row(self.current_func)
         row['params_addr'].append(empty_cell)
+
+    def sa_dec_type_param(self):
+        self.symbol_table[-1]['declaration type'] = 'param'
 
     def sa_start_scope(self):
         self.scope_stack.append(len(self.symbol_table))
@@ -98,27 +117,24 @@ class CodeGenerator:
                 return row
         return None
 
-    def sa_add_type(self):
-        self.symbol_table.append(
-            dict(type=self.current_keyword, scope=len(self.scope_stack)))
-
-    def sa_add_int_param(self):
-        self.symbol_table.append(
-            dict(type='int', scope=len(self.scope_stack) + 1))
-
     def sa_dec_type_func(self):
-        self.symbol_table[-1]['declaration type'] = 'func'
-        self.symbol_table[-1]['params_addr'] = []
-        self.current_func = self.symbol_table[-1]['lexeme']
+        row = self.symbol_table[-1]
+        row['declaration type'] = 'func'
+        row['params_addr'] = []
+        self.current_func = row['lexeme']
+        if row['lexeme'] != 'main':
+            self.sa_save()
+            self.semantic_stack.append(row['address'])
+        if row['type'] == 'int':
+            row['return'] = self.data_block.get_first_empty_cell()
+        else:
+            row['return'] = 0
 
     def sa_dec_type_arr(self):
         self.symbol_table[-1]['declaration type'] = 'arr'
 
     def sa_dec_type_var(self):
         self.symbol_table[-1]['declaration type'] = 'var'
-
-    def sa_dec_type_param(self):
-        self.symbol_table[-1]['declaration type'] = 'param'
 
     def sa_save(self):
         self.semantic_stack.append(len(self.program_block))
@@ -196,6 +212,7 @@ class CodeGenerator:
         self.semantic_stack.append(temp)
 
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
+
         print(token_name, token_lexeme, action_symbols)
         print(self.semantic_stack)
         if token_name == TokenNames.ID.value:
@@ -213,6 +230,7 @@ class CodeGenerator:
         self.program_block.append(f'({relop}, {s1}, {s2}, {s3})')
 
     def insert_formatted_code(self, idx: int, relop: str, s1, s2, s3):
+        self.add_file('1')
         self.program_block[idx] = f'({relop}, {s1}, {s2}, {s3})'
 
     def add_file(self, x):
@@ -221,7 +239,8 @@ class CodeGenerator:
             [f'{index}\t{code}' for index, code in enumerate(self.program_block)]))
 
     def sa_create_ar(self):
-        ar = Record(lexeme=self.current_id, control_link=self.ar_stack[-1])
+        control_link = None if len(self.ar_stack) == 0 else self.ar_stack[-1]
+        ar = Record(lexeme=self.current_id, control_link=control_link)
         current_row = self.get_symbol_row(ar.lexeme)
         for record in reversed(self.ar_stack):
             row = self.get_symbol_row(record.lexeme)
@@ -236,10 +255,10 @@ class CodeGenerator:
         row = self.get_symbol_row(record.lexeme)
         for param, actual_param in zip(row['params_addr'], record.actual_parameters):
             self.generate_formatted_code('ASSIGN', actual_param, param, '')
-        self.generate_formatted_code('JP', row['address'], '', '')
-        row = self.get_symbol_row(record.lexeme)
         self.generate_formatted_code(
-            'ASSIGN', f'#{len(self.program_block)+1}', row['address'], '')
+            'ASSIGN', f'#{len(self.program_block)+2}', self.semantic_stack.pop(), '')
+        self.generate_formatted_code('JP', row['start_addr'], '', '')
+        self.semantic_stack.append(row['return'])
 
     def sa_assign_param(self):
         param = self.semantic_stack.pop()
@@ -248,6 +267,29 @@ class CodeGenerator:
     def sa_add_start_addr(self):
         row = self.get_symbol_row(self.current_func)
         row['start_addr'] = len(self.program_block)
+
+    def sa_return(self):
+        row = self.get_symbol_row(self.current_func)
+        if row['type'] == 'int':
+            self.generate_formatted_code(
+                'ASSIGN', self.semantic_stack.pop(), row['return'], '')
+        if self.current_func != 'main':
+            self.generate_formatted_code(
+                'JP', f'@{self.semantic_stack[-1]}', '', '')
+        else:
+            self.main_return_stack.append(len(self.program_block))
+            self.program_block.append('')
+
+    def sa_last_return(self):
+        if self.current_func != 'main':
+            self.generate_formatted_code(
+                'JP', f'@{self.semantic_stack[-1]}', '', '')
+            self.semantic_stack.pop()
+            self.sa_jp()
+        else:
+            for i in reversed(self.main_return_stack):
+                self.insert_formatted_code(
+                    i, 'JP', len(self.program_block), '', '')
 
 
 class Stack(list):
@@ -262,11 +304,11 @@ class Stack(list):
 
 
 class Record:
-    def __init__(self, lexeme: str, control_link, access_link) -> None:
+    def __init__(self, lexeme: str, control_link) -> None:
         self.lexeme = lexeme
         self.actual_parameters = []
         self.control_link = control_link
-        self.access_link = access_link
+        self.access_link = None
         self.machine_status = None
         self.local_data = None
         self.temporaries = None
