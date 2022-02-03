@@ -1,12 +1,12 @@
 from pathlib import Path
-from code_generator import CodeGenerator
+from code_generator import CodeGenerator, SemanticErrorException
 from parser_statics import PARSE_TREE_FILE_PATH, NonTerminalNames, EPSILON
 from scanner import Scanner
 from statics import TokenNames
 from transition_diagram import State, NonTerminal
-from typing import List, Union, Tuple, Any
+from typing import Union, Tuple, Any
 from anytree import Node, RenderTree
-from statics import KEYWORDS, SYMBOL_TABLE_FILE_PATH
+from statics import SYMBOL_TABLE_FILE_PATH
 
 
 # handle line number for EOF in normal state and unclosed comment error
@@ -30,6 +30,7 @@ class Parser:
         self.code_generator.symbol_table = self.symbol_table
         self.code_generator.define_output_func()
         self.action_symbol_stack = []
+        self.semantic_errors = []
 
     def initialize_diagrams(self):
         State.create_all_states()
@@ -42,6 +43,8 @@ class Parser:
         self.reached_EOF = False
         while not self.reached_EOF:
             self.go_next_state()
+        self.create_files()
+
 
     def set_next_token(self):
         self.token_name, self.token_lexeme, self.line_number = self.scanner.get_next_token()
@@ -73,8 +76,7 @@ class Parser:
                 self.parent_node = self.parent_node_stack.pop()
                 if len(self.action_symbol_stack) > 0:
                     if self.action_symbol_stack[-1][2]:
-                        self.code_generator.handle_action_symbol(
-                            *self.action_symbol_stack.pop())
+                        self.call_action_symbol(*self.action_symbol_stack.pop())
                     else:
                         self.action_symbol_stack.pop()
                 return
@@ -98,8 +100,7 @@ class Parser:
                 [self.token_name, self.token_lexeme, action_symbol])
         else:
             if action_symbol:
-                self.code_generator.handle_action_symbol(
-                    self.token_name, self.token_lexeme, action_symbol)
+                self.call_action_symbol(self.token_name, self.token_lexeme, action_symbol)
             if edge == EPSILON:
                 Node(EPSILON, parent=self.parent_node)
             else:
@@ -157,3 +158,30 @@ class Parser:
         with open(self.syntax_errors_file_path, 'r+') as syntax_errors_file:
             if syntax_errors_file.read(1) == '':
                 syntax_errors_file.write('There is no syntax error.')
+
+    def call_action_symbol(self, name, lexeme, action_symbol):
+        try:
+            self.code_generator.handle_action_symbol(name, lexeme, action_symbol)
+        except SemanticErrorException as e:
+            self.semantic_errors.append(f'#{self.line_number} : {e.message}')
+
+    def create_files(self):
+        self.create_semantic_error_file()
+        self.create_code_generator_file()
+
+    def create_semantic_error_file(self):
+        with open('semantic_errors.txt','w') as semantic_error_file:
+            if self.semantic_errors:
+                semantic_error_file.write('\n'.join([err for err in self.semantic_errors]))
+            else:
+                semantic_error_file.write('The input program is semantically correct.')
+
+    def create_code_generator_file(self):
+        with open('output.txt','w') as out_file:
+            if self.semantic_errors:
+                out_file.write('The output code has not been generated.')
+            else:
+                out_file.write('\n'.join(
+                    [f'{index}\t{code}' for index, code in enumerate(self.code_generator.program_block)]))
+
+

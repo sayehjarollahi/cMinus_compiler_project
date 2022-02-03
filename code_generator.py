@@ -36,7 +36,10 @@ class CodeGenerator:
         return self.temporary_block.get_first_empty_cell()
 
     def find_addr(self, lexeme: str):
-        row = self.get_symbol_row(lexeme)
+        try:
+            row = self.get_symbol_row(lexeme)
+        except SymbolNotFound:
+            raise SymbolNotFound()
         return row['address']
 
     def sa_assign(self):
@@ -58,7 +61,11 @@ class CodeGenerator:
         self.semantic_stack.append(f'@{t2}')
 
     def sa_pid(self):
-        addr = self.find_addr(self.current_id)
+        try:
+            addr = self.find_addr(self.current_id)
+        except SymbolNotFound:
+            self.semantic_stack.append(0)
+            raise SemanticErrorException(f'Semantic Error! \'{self.current_id}\' is not defined.')
         self.semantic_stack.append(addr)
 
     def sa_push_num_dec(self):
@@ -122,7 +129,7 @@ class CodeGenerator:
         for row in reversed(self.symbol_table):
             if row['lexeme'] == lexeme:
                 return row
-        return None
+        raise SymbolNotFound()
 
     def sa_dec_type_func(self):
         row = self.symbol_table[-1]
@@ -264,7 +271,8 @@ class CodeGenerator:
         for param, actual_param in zip(row['params_addr'], record.actual_parameters):
             self.generate_formatted_code('ASSIGN', actual_param, param, '')
         self.generate_formatted_code(
-            'ASSIGN', f'#{len(self.program_block) + 2}', self.semantic_stack.pop(), '')  # self.semantic_stack[-1] = func['address']
+            'ASSIGN', f'#{len(self.program_block) + 2}', self.semantic_stack.pop(),
+            '')  # self.semantic_stack[-1] = func['address']
         self.generate_formatted_code('JP', row['start_addr'], '', '')
         if row['type'] == 'int':
             t = self.get_temp()
@@ -330,3 +338,12 @@ class Record:
         self.machine_status = None
         self.local_data = None
         self.temporaries = None
+
+
+class SemanticErrorException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class SymbolNotFound(Exception):
+    pass
