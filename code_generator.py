@@ -230,7 +230,6 @@ class CodeGenerator:
         self.program_block.append(f'({relop}, {s1}, {s2}, {s3})')
 
     def insert_formatted_code(self, idx: int, relop: str, s1, s2, s3):
-        self.add_file('1')
         self.program_block[idx] = f'({relop}, {s1}, {s2}, {s3})'
 
     def add_file(self, x):
@@ -275,7 +274,7 @@ class CodeGenerator:
                 'ASSIGN', self.semantic_stack.pop(), row['return'], '')
         if self.current_func != 'main':
             self.generate_formatted_code(
-                'JP', f'@{self.semantic_stack[-1]}', '', '')
+                'JP', f'@{self.semantic_stack[-1]}', '', '')  # semantic_stack[-1] = row['address]
         else:
             self.main_return_stack.append(len(self.program_block))
             self.program_block.append('')
