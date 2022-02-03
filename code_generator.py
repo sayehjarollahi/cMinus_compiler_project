@@ -212,9 +212,8 @@ class CodeGenerator:
         self.semantic_stack.append(temp)
 
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
-
-        print(token_name, token_lexeme, action_symbols)
-        print(self.semantic_stack)
+        # print(token_name, token_lexeme, action_symbols)
+        # print(self.semantic_stack)
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
         elif token_name == TokenNames.NUM.value:
@@ -273,8 +272,9 @@ class CodeGenerator:
             self.generate_formatted_code(
                 'ASSIGN', self.semantic_stack.pop(), row['return'], '')
         if self.current_func != 'main':
+            addr = row['address']
             self.generate_formatted_code(
-                'JP', f'@{self.semantic_stack[-1]}', '', '')  # semantic_stack[-1] = row['address]
+                'JP', f'@{addr}', '', '')  # semantic_stack[-1] = row['address]
         else:
             self.main_return_stack.append(len(self.program_block))
             self.program_block.append('')
