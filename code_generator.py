@@ -1,6 +1,4 @@
-import re
-from tkinter.messagebox import NO
-from typing import Dict, List, Union
+from typing import List
 from statics import TokenNames
 from pathlib import Path
 
@@ -24,12 +22,14 @@ class CodeGenerator:
         self.repeat_stack = []
         self.current_func = None
         self.main_return_stack = []
+        self.while_stack = []
 
     def define_output_func(self):
         self.symbol_table.append(dict(
             lexeme='output',
             address=0,
-            scope=float('inf')
+            scope=float('inf'),
+            type='void',
         ))
 
     def get_temp(self) -> int:
@@ -45,7 +45,12 @@ class CodeGenerator:
     def sa_assign(self):
         self.generate_formatted_code(
             'ASSIGN', self.semantic_stack[-1], self.semantic_stack[-2], '')
-        self.semantic_stack.pop()
+        first = self.get_type(self.semantic_stack.pop())
+        second = self.get_type(self.semantic_stack[-1])
+        if first != 'int':
+            raise_expression_type_exception('int', first)
+        if second != 'int':
+            raise_expression_type_exception('int', second)
 
     def sa_pop(self):
         self.semantic_stack.pop()
@@ -64,7 +69,7 @@ class CodeGenerator:
         try:
             addr = self.find_addr(self.current_id)
         except SymbolNotFound:
-            self.semantic_stack.append(0)
+            self.semantic_stack.append(float('inf'))
             raise SemanticErrorException(f'Semantic Error! \'{self.current_id}\' is not defined.')
         self.semantic_stack.append(addr)
 
@@ -118,6 +123,12 @@ class CodeGenerator:
     def sa_dec_type_param(self):
         self.symbol_table[-1]['declaration type'] = 'param'
 
+    def sa_define_int_param(self):
+        self.symbol_table[-1]['param type'] = 'var'
+
+    def sa_define_arr_param(self):
+        self.symbol_table[-1]['param type'] = 'arr'
+
     def sa_start_scope(self):
         self.scope_stack.append(len(self.symbol_table))
 
@@ -130,6 +141,12 @@ class CodeGenerator:
             if row['lexeme'] == lexeme:
                 return row
         raise SymbolNotFound()
+
+    def get_symbol_row_by_address(self, address):
+        for row in self.symbol_table:
+            if row['address'] and row['address'] == address:
+                return row
+        return None
 
     def sa_dec_type_func(self):
         row = self.symbol_table[-1]
@@ -145,9 +162,17 @@ class CodeGenerator:
             row['return'] = 0
 
     def sa_dec_type_arr(self):
+        if self.symbol_table[-1]['type'] == 'void':
+            lexeme = self.symbol_table[-1]['lexeme']
+            self.symbol_table.pop()
+            raise SemanticErrorException(f'Semantic Error! Illegal type of void for \'{lexeme}\'')
         self.symbol_table[-1]['declaration type'] = 'arr'
 
     def sa_dec_type_var(self):
+        if self.symbol_table[-1]['type'] == 'void':
+            lexeme = self.symbol_table[-1]['lexeme']
+            self.symbol_table.pop()
+            raise SemanticErrorException(f'Semantic Error! Illegal type of void for \'{lexeme}\'')
         self.symbol_table[-1]['declaration type'] = 'var'
 
     def sa_save(self):
@@ -173,7 +198,11 @@ class CodeGenerator:
         self.semantic_stack.pop()
 
     def sa_label(self):
+        self.while_stack.append(True)
         self.semantic_stack.append(len(self.program_block))
+
+    def sa_end_while_scope(self):
+        self.while_stack.pop()
 
     def sa_until(self):
         self.generate_formatted_code(
@@ -193,6 +222,8 @@ class CodeGenerator:
         self.repeat_stack.pop()
 
     def sa_break(self):
+        if not self.while_stack:
+            raise SemanticErrorException('Semantic Error! No \'repeat ... until\' found for \'break\'.')
         self.generate_formatted_code(
             'JP', f'@{self.repeat_stack[-1]}', '', '')
 
@@ -206,9 +237,34 @@ class CodeGenerator:
         temp = self.get_temp()
         self.generate_formatted_code(
             sign, self.semantic_stack[-2], self.semantic_stack[-1], temp)
-        self.semantic_stack.pop()
-        self.semantic_stack.pop()
+        first = self.semantic_stack.pop()
+        second = self.semantic_stack.pop()
         self.semantic_stack.append(temp)
+        first_type, second_type = self.get_type(first), self.get_type(second)
+        if first_type != 'int':
+            raise_expression_type_exception('int', first_type)
+        if second_type != 'int':
+            raise_expression_type_exception('int', second_type)
+
+    def get_type(self, variable):
+        if str(variable) == '0':
+            return 'void'
+        if str(variable).startswith('#'):
+            return 'int'
+        elif str(variable).startswith('@'):
+            return 'int'
+        elif self.is_addr_in_temprorary(variable):
+            return 'int'
+        row = self.get_symbol_row_by_address(variable)
+        type = row['declaration type']
+        if type == 'param':
+            type = row['param type']
+        if type == 'arr':
+            return 'array'
+        elif type == 'func':
+            return 'func'
+        elif type == 'var':
+            return 'int'
 
     def sa_def_arithmetic(self):
         self.symbol_stack.append(self.current_symbol)
@@ -221,13 +277,16 @@ class CodeGenerator:
             sign = 'LT'
         self.generate_formatted_code(
             sign, self.semantic_stack[-2], self.semantic_stack[-1], temp)
-        self.semantic_stack.pop()
-        self.semantic_stack.pop()
+        first = self.semantic_stack.pop()
+        second = self.semantic_stack.pop()
         self.semantic_stack.append(temp)
+        first_type, second_type = self.get_type(first), self.get_type(second)
+        if first_type != 'int':
+            raise_expression_type_exception('int', first_type)
+        if second_type != 'int':
+            raise_expression_type_exception('int', second_type)
 
     def handle_action_symbol(self, token_name: str, token_lexeme: str, action_symbols: List[str]):
-        # print(token_name, token_lexeme, action_symbols)
-        # print(self.semantic_stack)
         if token_name == TokenNames.ID.value:
             self.current_id = token_lexeme
         elif token_name == TokenNames.NUM.value:
@@ -257,7 +316,7 @@ class CodeGenerator:
         for record in reversed(self.ar_stack):
             row = self.get_symbol_row(record.lexeme)
             if row['scope'] < current_row['scope']:
-                ar.access_link = record
+                ar.acceyss_link = record
                 break
         self.ar_temp_stack.append(ar)
 
@@ -266,8 +325,8 @@ class CodeGenerator:
         if record.lexeme == 'output':
             self.handle_output(record)
             return
-        self.ar_stack.append(record)
         row = self.get_symbol_row(record.lexeme)
+        self.ar_stack.append(record)
         for param, actual_param in zip(row['params_addr'], record.actual_parameters):
             self.generate_formatted_code('ASSIGN', actual_param, param, '')
         self.generate_formatted_code(
@@ -280,8 +339,13 @@ class CodeGenerator:
             self.semantic_stack.append(t)
         else:
             self.semantic_stack.append(row['return'])
+        self.check_func_call_valid(record, row['params_addr'])
 
     def handle_output(self, record):
+        if len(record.actual_parameters) != 1:
+            raise SemanticErrorException('Semantic Error! Mismatch in numbers of arguments of \'output\'.')
+        if self.get_type(record.actual_parameters[0]) != 'int':
+            raise_parameter_type_exception(1, 'output', 'int', self.get_type(record.actual_parameters[0]))
         addr = record.actual_parameters[0]
         self.generate_formatted_code('PRINT', addr, '', '')
 
@@ -317,6 +381,33 @@ class CodeGenerator:
                 self.insert_formatted_code(
                     i, 'JP', len(self.program_block), '', '')
 
+    def check_func_call_valid(self, record, func_params):
+        if len(record.actual_parameters) != len(func_params):
+            raise SemanticErrorException(f'Semantic Error! Mismatch in numbers of arguments of \'{record.lexeme}\'.')
+        index = 0
+        for record_param, func_param in zip(record.actual_parameters, func_params):
+            index += 1
+            record_param_row = self.get_symbol_row_by_address(record_param)
+            func_param_type = self.get_symbol_row_by_address(func_param)['param type']
+            if str(record_param).startswith('#') or self.is_addr_in_temprorary(record_param) or \
+                    record_param_row['declaration type'] == 'var':
+                if func_param_type == 'arr':
+                    raise_parameter_type_exception(index, record.lexeme, 'array', 'int')
+            elif record_param_row['declaration type'] == 'arr' and func_param_type == 'var':
+                raise_parameter_type_exception(index, record.lexeme, 'int', 'array')
+            elif record_param_row['declaration type'] == 'func':
+                func_param_type = 'int' if func_param_type == 'var' else 'array'
+                raise_parameter_type_exception(index, record.lexeme, func_param_type, 'func')
+
+    def is_addr_in_temprorary(self, address):
+        return address >= self.temporary_block.starting_index
+
+    def is_addr_array(self, address):
+        row = self.get_symbol_row_by_address(address)
+        if row['type'] == 'addr':
+            return True
+        return False
+
 
 class Stack(list):
     def __init__(self, starting_index: int):
@@ -338,6 +429,16 @@ class Record:
         self.machine_status = None
         self.local_data = None
         self.temporaries = None
+
+
+def raise_parameter_type_exception(index, func_name, s1, s2):
+    raise SemanticErrorException(
+        f'Semantic Error! Mismatch in type of argument {index} '
+        f'of \'{func_name}\'. Expected \'{s1}\' but got \'{s2}\' instead.')
+
+
+def raise_expression_type_exception(expected, got):
+    raise SemanticErrorException(f'Semantic Error! Type mismatch in operands, Got {got} instead of {expected}.')
 
 
 class SemanticErrorException(Exception):

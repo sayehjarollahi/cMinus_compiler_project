@@ -45,7 +45,6 @@ class Parser:
             self.go_next_state()
         self.create_files()
 
-
     def set_next_token(self):
         self.token_name, self.token_lexeme, self.line_number = self.scanner.get_next_token()
         self.token_terminal_parameter = self.token_lexeme if self.token_name in {
@@ -84,11 +83,6 @@ class Parser:
         if not path:
             return self.handle_error()
         edge, next_state, action_symbol = path
-
-        if isinstance(edge, NonTerminal):
-            print(edge.name, next_state.id)
-        else:
-            print(edge, next_state.id)
         if isinstance(edge, NonTerminal):
             self.next_state_stack.append(next_state)
             self.present_state = edge.starting_state
@@ -170,18 +164,16 @@ class Parser:
         self.create_code_generator_file()
 
     def create_semantic_error_file(self):
-        with open('semantic_errors.txt','w') as semantic_error_file:
+        with open('semantic_errors.txt', 'w') as semantic_error_file:
             if self.semantic_errors:
                 semantic_error_file.write('\n'.join([err for err in self.semantic_errors]))
             else:
                 semantic_error_file.write('The input program is semantically correct.')
 
     def create_code_generator_file(self):
-        with open('output.txt','w') as out_file:
+        with open('output.txt', 'w') as out_file:
             if self.semantic_errors:
-                out_file.write('The output code has not been generated.')
+                out_file.write('The code has not been generated.')
             else:
                 out_file.write('\n'.join(
                     [f'{index}\t{code}' for index, code in enumerate(self.code_generator.program_block)]))
-
-
