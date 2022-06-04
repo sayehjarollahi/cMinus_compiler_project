@@ -1,0 +1,48 @@
+Program⟶Declaration_list $
+Declaration_list⟶Declaration Declaration_list | EPSILON
+Declaration⟶Declaration_initial #add_type Declaration_prime
+Declaration_initial⟶Type_specifier ID #add_id
+Declaration_prime⟶Fun_declaration_prime | Var_declaration_prime
+Var_declaration_prime⟶;#dec_type_var | [ NUM #push_num_dec ]#add_array ;#dec_type_arr
+Fun_declaration_prime⟶(#dec_type_func  Params ) #add_start_addr Compound_stmt #last_return
+Type_specifier⟶int | void
+Params⟶int #add_int_param ID #add_id_param #dec_type_param Param_prime Param_list | void
+Param_list⟶, Param #dec_type_param Param_list | EPSILON
+Param⟶Declaration_initial #add_type_param Param_prime
+Param_prime⟶[ ]#define_arr_param | EPSILON #define_int_param
+Compound_stmt⟶{ #start_scope Declaration_list Statement_list}#end_scope
+Statement_list⟶Statement Statement_list | EPSILON
+Statement⟶Expression_stmt | Compound_stmt | Selection_stmt | Iteration_stmt | Return_stmt #return
+Expression_stmt⟶Expression ; #pop | break #break ; | ;
+Selection_stmt⟶if ( Expression ) #save Statement Else_stmt
+Else_stmt⟶endif #jpf | else #jpf_save Statement endif #jp
+Iteration_stmt⟶repeat #temp_save #label Statement #end_while_scope until ( Expression ) #until #temp
+Return_stmt⟶return Return_stmt_prime 
+Return_stmt_prime⟶; | Expression ;
+Expression⟶Simple_expression_zegond | ID #pid B
+B⟶= Expression #assign | [ Expression ] #compute_addr_arr H | Simple_expression_prime
+H⟶= Expression #assign | G D C
+Simple_expression_zegond⟶Additive_expression_zegond C
+Simple_expression_prime⟶Additive_expression_prime C
+C⟶Relop Additive_expression #add_condition| EPSILON
+Relop⟶< #def_arithmetic | == #def_arithmetic
+Additive_expression⟶Term D
+Additive_expression_prime⟶Term_prime D
+Additive_expression_zegond⟶Term_zegond D
+D⟶Addop Term #calc_arithmetic D | EPSILON
+Addop⟶+ #def_arithmetic|- #def_arithmetic
+Term⟶Factor G
+Term_prime⟶Factor_prime G
+Term_zegond⟶Factor_zegond G
+G⟶* #def_arithmetic Factor #calc_arithmetic G | EPSILON
+Factor⟶( Expression ) | ID #pid Var_call_prime | NUM #push_num
+Var_call_prime⟶( #create_ar Args ) #call_func | Var_prime 
+Var_prime⟶[ Expression ] #compute_addr_arr | EPSILON #check_var_prime_type
+Factor_prime⟶( #create_ar Args )#call_func | EPSILON
+Factor_zegond⟶( Expression ) | NUM #push_num
+Args⟶Arg_list | EPSILON
+Arg_list⟶Expression #assign_param Arg_list_prime
+Arg_list_prime⟶, Expression #assign_param Arg_list_prime | EPSILON
+ 
+ 
+
